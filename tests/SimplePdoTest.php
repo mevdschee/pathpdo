@@ -6,7 +6,7 @@ use Tqdev\PdoJson\PathPdo;
 class SimplePdoTest extends TestCase
 {
     /**
-     * @dataProvider testQProvider
+     * @dataProvider qDataProvider
      */
     public function testQ($a, $b, $expected)
     {
@@ -14,7 +14,7 @@ class SimplePdoTest extends TestCase
         $this->assertSame($expected, $db->q($a, $b));
     }
 
-    public function testQProvider()
+    public function qDataProvider()
     {
         return [
             'single record' => ['select id, content from posts where id=?', [1], [['id' => 1, 'content' => 'blog started']]],
@@ -23,7 +23,7 @@ class SimplePdoTest extends TestCase
     }
 
     /**
-     * @dataProvider testSelectProvider
+     * @dataProvider selectDataProvider
      */
     public function testSelect($a, $b, $c, $expected)
     {
@@ -31,7 +31,7 @@ class SimplePdoTest extends TestCase
         $this->assertSame($expected, $db->select($a, $b, $c));
     }
 
-    public function testSelectProvider()
+    public function selectDataProvider()
     {
         return [
             'single record' => ['posts', ['id', 'content'], ['id' => 1], [['id' => 1, 'content' => 'blog started']]],

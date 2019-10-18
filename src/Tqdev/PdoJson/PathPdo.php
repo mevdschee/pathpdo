@@ -4,7 +4,6 @@ namespace Tqdev\PdoJson;
 
 class PathPdo extends SimplePdo
 {
-
     public function q(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
     {
         if ($returnNumAffected || $returnLastInsertId) {

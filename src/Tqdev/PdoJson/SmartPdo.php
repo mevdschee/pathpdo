@@ -15,11 +15,11 @@ class SmartPdo extends LazyPdo
             throw new \Exception(sprintf('Driver "%s" is not supported', $this->driver));
         }
         $this->options = $this->getOptions($options);
+        parent::__construct($dsn, $username, $password, $this->options);
         $this->commands = $this->getCommands(array());
         foreach ($this->commands as $command) {
             $this->addInitCommand($command);
         }
-        parent::__construct($dsn, $username, $password, $this->options);
     }
 
     public function q(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)

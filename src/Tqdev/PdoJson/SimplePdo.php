@@ -4,7 +4,6 @@ namespace Tqdev\PdoJson;
 
 class SimplePdo extends SmartPdo
 {
-
     public function insert($table, $record): int
     {
         if (empty($table) || empty($record)) {
@@ -26,7 +25,6 @@ class SimplePdo extends SmartPdo
         $sql = 'SELECT ' . $this->buildSqlSelect($fields) . ' ';
         $sql .= 'FROM ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        var_dump($sql);
         return $this->q($sql, $params, false, false);
     }
 
