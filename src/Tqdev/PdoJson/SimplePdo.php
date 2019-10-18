@@ -131,11 +131,14 @@ class SimplePdo extends SmartPdo
         }
         $args = [];
         foreach ($conditions as $name => $value) {
-            $parts = explode(' ', $name, 2);
-            if (count($parts) != 2) {
-                $parts = [$parts[0], ''];
+            if ($name) {
+                $operator = '';
+            } elseif (is_array($value) && count($value) == 3) {
+                list($name, $operator, $value) = $value;
+            } else {
+                $args[] = '1 = 0';
+                continue;
             }
-            list($name, $operator) = $parts;
             $name = $this->quoteIdentifier($name);
             $operator = $this->selectOperator($operator);
             if ($value === null) {
