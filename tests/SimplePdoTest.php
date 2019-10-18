@@ -16,15 +16,15 @@ class SimplePdoTest extends TestCase
     public function testQ($a, $b, $expected)
     {
         $db = $this->connect();
-        $this->assertSame($expected, $db->q($a, $b));
+        $this->assertSame($expected, json_encode($db->q($a, $b)));
     }
 
     public function qDataProvider()
     {
         return [
-            'single record' => ['select id, content from posts where id=?', [1], [['id' => 1, 'content' => 'blog started']]],
-            'two records' => ['select id from posts where id<=2', [], [['id' => 1], ['id' => 2]]],
-            'posts with comments' => ['select id, content from posts left join comments on post_id = posts.id where posts.id<=2', [], [['id' => 1], ['id' => 2]]],
+            'single record' => ['select id, content from posts where id=?', [1], '[{"id":1,"content":"blog started"}]'],
+            'two records' => ['select id from posts where id<=2', [], '[{"id":1},{"id":2}]'],
+            'posts with comments' => ['select posts.id as "posts.id", comments.id as "posts.comments.id" from posts left join comments on post_id = posts.id where posts.id<=2', [], []],
         ];
     }
 
@@ -34,14 +34,14 @@ class SimplePdoTest extends TestCase
     public function testSelect($a, $b, $c, $expected)
     {
         $db = $this->connect();
-        $this->assertSame($expected, $db->select($a, $b, $c));
+        $this->assertSame($expected, json_encode($db->select($a, $b, $c)));
     }
 
     public function selectDataProvider()
     {
         return [
-            'single record' => ['posts', ['id', 'content'], ['id' => 1], [['id' => 1, 'content' => 'blog started']]],
-            'two records' => ['posts', ['id'], [['id', '<=', 2]], [['id' => 1], ['id' => 2]]],
+            'single record' => ['posts', ['id', 'content'], ['id' => 1], '[{"id":1,"content":"blog started"}]'],
+            'two records' => ['posts', ['id'], [['id', '<=', 2]], '[{"id":1},{"id":2}]'],
         ];
     }
 }
