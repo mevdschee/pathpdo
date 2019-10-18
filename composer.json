@@ -1,0 +1,26 @@
+{
+    "name": "mevdschee/pdo-json",
+    "type": "library",
+    "description": "JSON interface to a PDO connected SQL database.",
+    "keywords": [
+      "rest-api",
+      "database",
+      "sql-database"
+    ],
+    "homepage": "https://github.com/mevdschee/pdo-json",
+    "license": "MIT",
+    "authors": [
+      {
+        "name": "Maurits van der Schee",
+        "email": "maurits@vdschee.nl",
+        "homepage": "https://github.com/mevdschee"
+      }
+    ],
+    "require": {
+      "php": ">=7.0.0",
+      "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": { "Tqdev\\PdoJson\\": "src/Tqdev/PdoJson" }
+    }
+}
