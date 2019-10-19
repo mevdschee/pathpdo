@@ -23,7 +23,7 @@ class PathPdo extends SimplePdo
             foreach ($record as $name => $value) {
                 $path = explode('.', $name);
                 $name = array_pop($path);
-                if (!count($path)) {
+                if (empty($path)) {
                     $path = ['[]'];
                 }
                 $path = implode('.', $path);
