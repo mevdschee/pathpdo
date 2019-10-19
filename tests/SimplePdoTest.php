@@ -38,16 +38,16 @@ class SimplePdoTest extends TestCase
     /**
      * @dataProvider insertDataProvider
      */
-    public function testInsert($a, $b, $expected)
+    public function testInsert($a, $b)
     {
-        $this->assertSame($expected, json_encode(static::$db->insert($a, $b)));
+        $this->assertIsInt(static::$db->insert($a, $b));
     }
 
     public function insertDataProvider()
     {
         return [
-            'insert posts record' => ['posts', ['id' => 15, 'user_id' => 1, 'category_id' => 1, 'content' => 'blog started'], '15'],
-            'second records' => ['posts', ['id' => 16, 'user_id' => 1, 'category_id' => 1, 'content' => 'blog started'], '16'],
+            'insert posts record' => ['posts', ['user_id' => 1, 'category_id' => 1, 'content' => 'blog started']],
+            'second records' => ['posts', ['user_id' => 1, 'category_id' => 1, 'content' => 'blog started']],
         ];
     }
 }
