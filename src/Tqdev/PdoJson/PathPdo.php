@@ -60,14 +60,14 @@ class PathPdo extends SimplePdo
         }
         // make json
         $produce = null;
-        $produce = function ($tree, $i = 0) use (&$produce) {
+        $produce = function ($tree) use (&$produce) {
             $results = $tree->getValues();
             if (count($results)) $results = $results[0];
             foreach ($tree->getKeys() as $key) {
                 if (substr($key, 0, 1) == '!' && substr($key, -1, 1) == '!') {
-                    $results[] = $produce($tree->get($key), $i + 1);
+                    $results[] = $produce($tree->get($key));
                 } else {
-                    $results[$key] = $produce($tree->get($key), $i + 1);
+                    $results[$key] = $produce($tree->get($key));
                 }
             }
             return $results;
