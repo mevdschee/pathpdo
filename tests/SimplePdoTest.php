@@ -5,11 +5,6 @@ use Tqdev\PdoJson\PathPdo;
 
 class SimplePdoTest extends TestCase
 {
-    private function connect()
-    {
-        return new PathPdo('mysql:host=localhost;port=3306;dbname=php-crud-api;charset=utf8mb4', 'php-crud-api', 'php-crud-api');
-    }
-
     /**
      * @dataProvider qDataProvider
      */
@@ -48,7 +43,7 @@ class SimplePdoTest extends TestCase
      */
     public function testSelect($a, $b, $c, $expected)
     {
-        $db = $this->connect();
+        $db = PathPdo::create('php-crud-api', 'php-crud-api', 'php-crud-api');
         $this->assertSame($expected, json_encode($db->select($a, $b, $c)));
     }
 
