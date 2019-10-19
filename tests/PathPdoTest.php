@@ -5,13 +5,25 @@ use Tqdev\PdoJson\PathPdo;
 
 class PathPdoTest extends TestCase
 {
+    static $db;
+
+    public static function setUpBeforeClass(): void
+    {
+        static::$db = PathPdo::create(getenv('PDO_DRIVER_USERNAME'), getenv('PDO_DRIVER_PASSWORD'), getenv('PDO_DRIVER_DATABASE'));
+        static::$db->beginTransaction();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        static::$db->rollback();
+    }
+
     /**
      * @dataProvider qDataProvider
      */
     public function testQ($a, $b, $expected)
     {
-        $db = PathPdo::create('php-crud-api', 'php-crud-api', 'php-crud-api');
-        $this->assertSame($expected, json_encode($db->q($a, $b)));
+        $this->assertSame($expected, json_encode(static::$db->q($a, $b)));
     }
 
     public function qDataProvider()
