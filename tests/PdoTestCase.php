@@ -25,7 +25,7 @@ class PdoTestCase extends TestCase
 
     public function tearDown(): void
     {
-        $this->db = static::$pdo;
+        //$this->db = static::$pdo;
     }
 
     public static function tearDownAfterClass(): void
