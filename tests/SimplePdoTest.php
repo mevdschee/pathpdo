@@ -11,7 +11,7 @@ class SimplePdoTest extends PdoTestCase
      */
     public function testSelect($a, $b, $c, $expected)
     {
-        $this->assertSame($expected, json_encode(static::$db->select($a, $b, $c)));
+        $this->assertSame($expected, json_encode($this->db->select($a, $b, $c)));
     }
 
     public function selectDataProvider()
@@ -28,7 +28,7 @@ class SimplePdoTest extends PdoTestCase
      */
     public function testInsert($a, $b)
     {
-        $this->assertIsInt(static::$db->insert($a, $b));
+        $this->assertIsInt($this->db->insert($a, $b));
     }
 
     public function insertDataProvider()
