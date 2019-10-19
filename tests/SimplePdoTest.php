@@ -30,7 +30,7 @@ class SimplePdoTest extends TestCase
                 '{"posts":[{"id":1,"comments":[{"id":1},{"id":2}]},{"id":2,"comments":[{"id":3},{"id":4},{"id":5},{"id":6}]}]}'
             ],
             'comments with post' => [
-                'select posts.id as "comments[].post.id", comments.id as "comments[].id", comments.message as "comments[].text" from posts left join comments on post_id = posts.id where posts.id<=2', [],
+                'select posts.id as "comments[].post.id", comments.id as "comments[].id" from posts left join comments on post_id = posts.id where posts.id<=2', [],
                 '{"comments":[{"id":1,"post":{"id":1}},{"id":2,"post":{"id":1}},{"id":3,"post":{"id":2}},{"id":4,"post":{"id":2}},{"id":5,"post":{"id":2}},{"id":6,"post":{"id":2}}]}'
             ],
             'count posts' => ['select count(*) as "posts" from posts', [], '[{"posts":12}]'],
