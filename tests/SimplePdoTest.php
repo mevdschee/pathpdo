@@ -15,7 +15,7 @@ class SimplePdoTest extends TestCase
      */
     public function testQ($a, $b, $expected)
     {
-        $db = $this->connect();
+        $db = PathPdo::create('php-crud-api', 'php-crud-api', 'php-crud-api');
         $this->assertSame($expected, json_encode($db->q($a, $b)));
     }
 

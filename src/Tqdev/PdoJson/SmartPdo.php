@@ -38,13 +38,13 @@ class SmartPdo extends LazyPdo
                 $dsn = "$driver:Server=$address,$port;Database=$database";
                 break;
         }
-        return new SmartPdo($dsn, $username, $password, $options);
+        return new static($dsn, $username, $password, $options);
     }
 
     public function q(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
     {
         if (empty($params)) {
-            $stmt = $this->pdo->query($statement);
+            $stmt = $this->query($statement);
         } else {
             $stmt = $this->prepare($statement);
             $stmt->execute($params);
