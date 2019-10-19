@@ -131,7 +131,7 @@ class SimplePdo extends SmartPdo
         }
         $args = [];
         foreach ($conditions as $name => $value) {
-            if ($name) {
+            if (!is_numeric($name)) {
                 $operator = '';
             } elseif (is_array($value) && count($value) == 3) {
                 list($name, $operator, $value) = $value;
@@ -146,7 +146,7 @@ class SimplePdo extends SmartPdo
                 $args[] = $name . ' ' . $operator . ' NULL';
             } elseif (\is_array($value)) {
                 $operator = $operator ?: 'IN';
-                $qmarks = explode(', ', str_split(str_repeat('?', count($value))));
+                $qmarks = implode(', ', str_split(str_repeat('?', count($value))));
                 $args[] = $name . ' ' . $operator . ' (' . $qmarks . ')';
                 foreach ($value as $val) {
                     $params[] = $val;
