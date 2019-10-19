@@ -24,6 +24,7 @@ class SimplePdoTest extends TestCase
         return [
             'single record' => ['select id, content from posts where id=?', [1], '[{"id":1,"content":"blog started"}]'],
             'two records' => ['select id from posts where id<=2', [], '[{"id":1},{"id":2}]'],
+            'two records named' => ['select id from posts where id<=:two and id>=:one', ['one' => 1, 'two' => 2], '[{"id":1},{"id":2}]'],
             'posts with comments' => [
                 'select posts.id as "posts[].id", comments.id as "posts[].comments[].id" from posts left join comments on post_id = posts.id where posts.id<=2', [],
                 '{"posts":[{"id":1,"comments":[{"id":1},{"id":2}]},{"id":2,"comments":[{"id":3},{"id":4},{"id":5},{"id":6}]}]}'
