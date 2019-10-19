@@ -4,21 +4,6 @@ namespace Tqdev\PdoJson;
 
 class SimplePdo extends SmartPdo
 {
-    public static function create($driver, $address, $port, $username, $password, $database): SimplePdo
-    {
-        switch (strtolower($driver)) {
-            case 'mysql':
-                $dsn = "$driver:host=$address;port=$port;dbname=$database;charset=utf8mb4";
-            case 'pgsql':
-                $dsn = "$driver:host=$address port=$port dbname=$database options='--client_encoding=UTF8'";
-            case 'sqlsrv':
-                $dsn = "$driver:Server=$address,$port;Database=$database";
-            default:
-                throw new \Exception(sprintf('Driver "%s" is not supported', $driver));
-        }
-        return new SimplePdo($dsn, $username, $password);
-    }
-
     public function insert($table, $record): int
     {
         if (empty($table) || empty($record)) {
