@@ -22,6 +22,25 @@ class SmartPdo extends LazyPdo
         }
     }
 
+    public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', int $port = 0, array $options = array()): SmartPdo
+    {
+        switch ($driver) {
+            case 'mysql':
+                $port = $port ?: 3306;
+                $dsn = "$driver:host=$address;port=$port;dbname=$database;charset=utf8mb4";
+                break;
+            case 'pgsql':
+                $port = $port ?: 5432;
+                $dsn = "$driver:host=$address port=$port dbname=$database options='--client_encoding=UTF8'";
+                break;
+            case 'sqlsrv':
+                $port = $port ?: 1433;
+                $dsn = "$driver:Server=$address,$port;Database=$database";
+                break;
+        }
+        return new SmartPdo($dsn, $username, $password, $options);
+    }
+
     public function q(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
     {
         if (empty($params)) {
