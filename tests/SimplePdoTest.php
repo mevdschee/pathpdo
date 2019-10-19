@@ -1,22 +1,10 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use Tqdev\PdoJson\SimplePdo;
+namespace Tqdev\PdoJson\Tests;
 
-class SimplePdoTest extends TestCase
+class SimplePdoTest extends PdoTestCase
 {
-    static $db;
-
-    public static function setUpBeforeClass(): void
-    {
-        static::$db = SimplePdo::create(getenv('PDO_DRIVER_USERNAME'), getenv('PDO_DRIVER_PASSWORD'), getenv('PDO_DRIVER_DATABASE'));
-        static::$db->beginTransaction();
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        static::$db->rollback();
-    }
+    static $class = '\Tqdev\PdoJson\SimplePdo';
 
     /**
      * @dataProvider selectDataProvider

@@ -1,22 +1,10 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use Tqdev\PdoJson\PathPdo;
+namespace Tqdev\PdoJson\Tests;
 
-class PathPdoTest extends TestCase
+class PathPdoTest extends PdoTestCase
 {
-    static $db;
-
-    public static function setUpBeforeClass(): void
-    {
-        static::$db = PathPdo::create(getenv('PDO_DRIVER_USERNAME'), getenv('PDO_DRIVER_PASSWORD'), getenv('PDO_DRIVER_DATABASE'));
-        static::$db->beginTransaction();
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        static::$db->rollback();
-    }
+    static $class = '\Tqdev\PdoJson\PathPdo';
 
     /**
      * @dataProvider qDataProvider

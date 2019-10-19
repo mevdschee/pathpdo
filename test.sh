@@ -5,5 +5,5 @@ fi
 export PDO_DRIVER_USERNAME=php-crud-api
 export PDO_DRIVER_PASSWORD=php-crud-api
 export PDO_DRIVER_DATABASE=php-crud-api
-php phpunit.phar --bootstrap vendor/autoload.php tests
+php phpunit.phar
 

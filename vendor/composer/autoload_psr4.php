@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Tqdev\\PdoJson\\' => array($baseDir . '/src/Tqdev/PdoJson'),
+    'Tqdev\\PdoJson\\Tests\\' => array($baseDir . '/tests'),
+    'Tqdev\\PdoJson\\' => array($baseDir . '/src'),
 );

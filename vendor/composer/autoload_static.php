@@ -4,27 +4,32 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb11d02ad9a5f126de86017ccf629fb7a
+class ComposerStaticInit8ef4de27283dc9446c607342a6f50fca
 {
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
+            'Tqdev\\PdoJson\\Tests\\' => 20,
             'Tqdev\\PdoJson\\' => 14,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Tqdev\\PdoJson\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/tests',
+        ),
         'Tqdev\\PdoJson\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src/Tqdev/PdoJson',
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb11d02ad9a5f126de86017ccf629fb7a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb11d02ad9a5f126de86017ccf629fb7a::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8ef4de27283dc9446c607342a6f50fca::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8ef4de27283dc9446c607342a6f50fca::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }

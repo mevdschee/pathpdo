@@ -21,6 +21,9 @@
       "ext-pdo": "*"
     },
     "autoload": {
-        "psr-4": { "Tqdev\\PdoJson\\": "src/Tqdev/PdoJson" }
+        "psr-4": { "Tqdev\\PdoJson\\": "src/" }
+    },
+    "autoload-dev": {
+      "psr-4": { "Tqdev\\PdoJson\\Tests\\": "tests/" }
     }
 }
