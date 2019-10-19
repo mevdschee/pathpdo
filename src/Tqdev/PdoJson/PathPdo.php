@@ -46,9 +46,8 @@ class PathPdo extends SimplePdo
             $mapping = [];
             foreach ($keys as $key) {
                 $record = $result[$key];
-                var_dump($key);
                 if (substr($key, -2) == '[]') {
-                    $hash = md5(json_encode($record));
+                    $hash = json_encode($record);
                     $key = str_replace(array_keys($mapping), array_values($mapping), $key);
                     $mapping[$key] = substr($key, 0, -2) . ".!$hash!";
                 }
