@@ -22,7 +22,7 @@ class SmartPdo extends LazyPdo
         }
     }
 
-    public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', int $port = 0, array $options = array()): SmartPdo
+    public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', int $port = 0, array $options = array())
     {
         switch ($driver) {
             case 'mysql':
