@@ -21,9 +21,10 @@ class PathPdo extends SimplePdo
         while ($record = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $result = [];
             foreach ($record as $name => $value) {
-                $path = explode('.', $name);
-                $name = array_pop($path);
-                if (empty($path)) {
+                if (substr($name, 0, 1) == '$') {
+                    $path = explode('.', substr($name, 1));
+                    $name = array_pop($path);
+                } else {
                     $path = ['[]'];
                 }
                 $path = implode('.', $path);
