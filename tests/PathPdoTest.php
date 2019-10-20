@@ -29,7 +29,12 @@ class PathPdoTest extends PdoTestCase
                 '{"comments":[{"id":1,"post":{"id":1}},{"id":2,"post":{"id":1}},{"id":3,"post":{"id":2}},{"id":4,"post":{"id":2}},{"id":5,"post":{"id":2}},{"id":6,"post":{"id":2}}]}'
             ],
             'count posts' => ['select count(*) as "posts" from posts', [], '[{"posts":12}]'],
+            'count posts path' => ['select count(*) as "$[].posts" from posts', [], '[{"posts":12}]'],
             'count posts object' => ['select count(*) as "$.posts" from posts', [], '{"posts":12}'],
+            'count posts grouped' => [
+                'select categories.name, count(posts.id) as "post_count" from posts, categories where posts.category_id = categories.id group by category_id', [],
+                '[{"name":"announcement","post_count":11},{"name":"article","post_count":1}]'
+            ],
             'count posts with root' => ['select count(*) as "$.statistics.posts" from posts', [], '{"statistics":{"posts":12}}'],
             'count posts and comments' => [
                 'select (select count(*) from posts) as "$.stats.posts", (select count(*) from comments) as "$.stats.comments"', [],
