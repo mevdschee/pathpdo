@@ -28,6 +28,14 @@ class PathPdoTest extends PdoTestCase
                 'select posts.id as "$.comments[].post.id", comments.id as "$.comments[].id" from posts left join comments on post_id = posts.id where posts.id<=2', [],
                 '{"comments":[{"id":1,"post":{"id":1}},{"id":2,"post":{"id":1}},{"id":3,"post":{"id":2}},{"id":4,"post":{"id":2}},{"id":5,"post":{"id":2}},{"id":6,"post":{"id":2}}]}'
             ],
+            'posts with comments no alias' => [
+                'select posts.id, comments.id from posts left join comments on post_id = posts.id where posts.id=1', [],
+                '[{"posts":{"id":1},"comments":{"id":1}},{"posts":{"id":1},"comments":{"id":2}}]'
+            ],
+            'posts with comments with alias' => [
+                'select posts.id as "$[].posts.id", comments.id as "$[].comments.id" from posts left join comments on post_id = posts.id where posts.id=1', [],
+                '[{"posts":{"id":1},"comments":{"id":1}},{"posts":{"id":1},"comments":{"id":2}}]'
+            ],
             'count posts' => ['select count(*) as "posts" from posts', [], '[{"posts":12}]'],
             'count posts path' => ['select count(*) as "$[].posts" from posts', [], '[{"posts":12}]'],
             'count posts object' => ['select count(*) as "$.posts" from posts', [], '{"posts":12}'],
