@@ -18,7 +18,7 @@ class PathPdo extends SimplePdo
         }
         // get meta
         $meta = $this->getMeta($statement);
-        // get all records path
+        // get all record paths
         $records = $this->getAllRecords($statement, $meta);
         // group by brackets
         $results = $this->groupBySeparator($records, '[]');
@@ -54,16 +54,16 @@ class PathPdo extends SimplePdo
             $record = [];
             foreach ($row as $i => $value) {
                 $name = $meta[$i]['name'];
-                $table = $meta[$i]['table'];
+                // enable auto-mode
                 if (substr($name, 0, 1) != '$') {
+                    $table = $meta[$i]['table'];
                     if ($tableCount > 1) {
                         $name = '$[].' . $table . '.' . $name;
                     } else {
                         $name = '$[].' . $name;
                     }
                 }
-                $name = substr($name, 1);
-                $record[$name] = $value;
+                $record[substr($name, 1)] = $value;
             }
             $records[] = $record;
         }
