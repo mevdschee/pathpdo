@@ -21,7 +21,7 @@ class PathPdo extends SimplePdo
         // get all records path
         $records = $this->getAllRecords($statement, $meta);
         // group by brackets
-        $results = $this->groupOnSeparator($records, '[]');
+        $results = $this->groupBySeparator($records, '[]');
         // add hashes
         $results = $this->addHashes($results);
         // combine into tree by dots
@@ -70,7 +70,7 @@ class PathPdo extends SimplePdo
         return $records;
     }
 
-    private function groupOnSeparator($records, $separator): array
+    private function groupBySeparator($records, $separator): array
     {
         $results = [];
         foreach ($records as $record) {
