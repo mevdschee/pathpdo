@@ -135,28 +135,24 @@ class PathPdo extends SimplePdo
                 }
             }
         }
-        return $results;
+        return $results[''];
     }
 
     private function removeHashes($tree): array
     {
-        $produce = null;
-        $produce = function ($tree) use (&$produce) {
-            $values = [];
-            $trees = [];
-            foreach ($tree as $key => $value) {
-                if (is_array($value)) {
-                    if (substr($key, 0, 1) == '!' && substr($key, -1, 1) == '!') {
-                        $trees[] = $produce($tree[$key]);
-                    } else {
-                        $trees[$key] = $produce($tree[$key]);
-                    }
+        $values = [];
+        $trees = [];
+        foreach ($tree as $key => $value) {
+            if (is_array($value)) {
+                if (substr($key, 0, 1) == '!' && substr($key, -1, 1) == '!') {
+                    $trees[] = $this->removeHashes($tree[$key]);
                 } else {
-                    $values[$key] = $value;
+                    $trees[$key] = $this->removeHashes($tree[$key]);
                 }
+            } else {
+                $values[$key] = $value;
             }
-            return array_merge($values, $trees);
-        };
-        return $produce($tree['']);
+        }
+        return array_merge($values, $trees);
     }
 }
