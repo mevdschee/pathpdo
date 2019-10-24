@@ -37,6 +37,22 @@ class PathPdo extends SimplePdo
         for ($i = 0; $i < $statement->columnCount(); $i++) {
             $meta[] = $statement->getColumnMeta($i);
         }
+        $tableCount = $this->getTableCount($meta);
+        for ($i = 0; $i < count($meta); $i++) {
+            $name = $meta[$i]['name'];
+            // enable auto-mode
+            if (substr($name, 0, 1) != '$') {
+                $table = $meta[$i]['table'];
+                if ($tableCount > 1) {
+                    $path = '$[].' . $table . '.' . $name;
+                } else {
+                    $path = '$[].' . $name;
+                }
+            } else {
+                $path = $name;
+            }
+            $meta[$i]['path'] = $path;
+        }
         return $meta;
     }
 
@@ -47,23 +63,12 @@ class PathPdo extends SimplePdo
 
     private function getAllRecords($statement, $meta): array
     {
-        $tableCount = $this->getTableCount($meta);
-
         $records = [];
         while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
             $record = [];
             foreach ($row as $i => $value) {
-                $name = $meta[$i]['name'];
-                // enable auto-mode
-                if (substr($name, 0, 1) != '$') {
-                    $table = $meta[$i]['table'];
-                    if ($tableCount > 1) {
-                        $name = '$[].' . $table . '.' . $name;
-                    } else {
-                        $name = '$[].' . $name;
-                    }
-                }
-                $record[substr($name, 1)] = $value;
+                $path = $meta[$i]['path'];
+                $record[substr($path, 1)] = $value;
             }
             $records[] = $record;
         }
