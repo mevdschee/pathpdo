@@ -154,7 +154,7 @@ class PathPdo extends SimplePdo
                 $values[$key] = $value;
             }
         }
-        if (count(results)) {
+        if (count($results)) {
             $hidden = array_merge(array_keys(values), array_keys(trees));
             if (count($hidden) > 0) {
                 throw new PathError('Path "' . $path . '.' . $hidden[0] . '" is hidden by path "' . $path . '[]"');
