@@ -2,5 +2,5 @@
 
 namespace Tqdev\PdoJson;
 
-class PathError extends Exception
+class PathError extends \Exception
 { }
