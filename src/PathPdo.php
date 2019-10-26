@@ -32,34 +32,74 @@ class PathPdo extends SimplePdo
 
     private function getMeta($statement): array
     {
+        $columns = $this->getColumns($statement);
+        $tables = $this->getTables($statement);
+        $paths = $this->getPaths($columns, $tables);
         $meta = [];
-        for ($i = 0; $i < $statement->columnCount(); $i++) {
-            $meta[] = $statement->getColumnMeta($i);
-        }
-        $tableCount = $this->getTableCount($meta);
-        for ($i = 0; $i < count($meta); $i++) {
-            $name = $meta[$i]['name'];
-            // enable auto-mode
-            if (substr($name, 0, 1) != '$') {
-                if ($tableCount > 1 && isset($meta[$i]['table'])) {
-                    $table = $meta[$i]['table'];
-                    $path = '$[].' . $table . '.' . $name;
-                } else {
-                    $path = '$[].' . $name;
-                }
-            } else {
-                $path = $name;
-            }
-            $meta[$i]['path'] = $path;
+        foreach ($columns as $i => $column) {
+            $meta[] = ['name' => $column, 'table' => $tables[$i], 'path' => $paths[$i]];
         }
         return $meta;
     }
 
-    private function getTableCount($meta): int
+    private function getColumns($statement): array
     {
-        return count(array_filter(array_unique(array_column($meta, 'table'))));
+        $columns = [];
+        for ($i = 0; $i < $statement->columnCount(); $i++) {
+            $columns[] = $statement->getColumnMeta($i)['name'];
+        }
+        return $columns;
     }
 
+    private function getTables($statement): array
+    {
+        $tables = [];
+        $tableOids = [];
+        for ($i = 0; $i < $statement->columnCount(); $i++) {
+            $column = $statement->getColumnMeta($i);
+            $tableName = '';
+            if (isset($column['table'])) {
+                $tableName = $column['table'];
+            } elseif (isset($column['pgsql:table_oid'])) {
+                $tableOid = $column['pgsql:table_oid'];
+                if (isset($tableOids[$tableOid])) {
+                    $tableName = $tableOids[$tableOid];
+                } else {
+                    $result = parent::q('select relname from pg_class where oid=:oid', ['oid' => $tableOid]);
+                    if ($result) {
+                        $tableName = $result[0][0];
+                    }
+                    $tableOids[$tableOid] = $tableName;
+                }
+            }
+            $tables[] = $tableName;
+        }
+        return $tables;
+    }
+
+    private function getTableCount($tables): int
+    {
+        return count(array_filter(array_unique($tables)));
+    }
+
+    private function getPaths($columns, $tables): array
+    {
+        $paths = [];
+        $tableCount = $this->getTableCount($tables);
+        foreach ($columns as $i => $column) {
+            if (substr($column, 0, 1) != '$') {
+                if ($tableCount > 1 && $tables[$i]) {
+                    $paths[] = '$[].' . $tables[$i] . '.' . $column;
+                } else {
+                    $paths[] = '$[].' . $column;
+                }
+            } else {
+                $paths[] = $column;
+            }
+        }
+        return $paths;
+    }
+    
     private function getAllRecords($statement, $meta): array
     {
         $records = [];
