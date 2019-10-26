@@ -43,7 +43,7 @@ class PathPdo extends SimplePdo
             // enable auto-mode
             if (substr($name, 0, 1) != '$') {
                 $table = $meta[$i]['table'];
-                if ($tableCount > 1) {
+                if ($tableCount > 1 && $table) {
                     $path = '$[].' . $table . '.' . $name;
                 } else {
                     $path = '$[].' . $name;
@@ -102,6 +102,9 @@ class PathPdo extends SimplePdo
         foreach ($records as $record) {
             $mapping = [];
             foreach ($record as $key => $part) {
+                if (substr($key, -2) != '[]') {
+                    continue;
+                }
                 $hash = md5(json_encode($part));
                 $mapping[$key] = substr($key, 0, -2) . '.!' . $hash . '!';
             }

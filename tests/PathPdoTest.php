@@ -41,7 +41,7 @@ class PathPdoTest extends PdoTestCase
             'count posts with path' => ['select count(*) as "$[].posts" from posts', [], '[{"posts":12}]'],
             'count posts as object with path' => ['select count(*) as "$.posts" from posts', [], '{"posts":12}'],
             'count posts grouped no path' => [
-                'select categories.name, count(posts.id) as "post_count" from posts, categories where posts.category_id = categories.id group by category_id', [],
+                'select categories.name, count(posts.id) as "post_count" from posts, categories where posts.category_id = categories.id group by categories.name', [],
                 '[{"name":"announcement","post_count":11},{"name":"article","post_count":1}]'
             ],
             'count posts with added root set in path' => ['select count(*) as "$.statistics.posts" from posts', [], '{"statistics":{"posts":12}}'],
