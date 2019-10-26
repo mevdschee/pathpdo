@@ -21,14 +21,13 @@ class PathPdo extends SimplePdo
         // get all record paths
         $records = $this->getAllRecords($statement, $meta);
         // group by brackets
-        $results = $this->groupBySeparator($records, '[]');
+        $groups = $this->groupBySeparator($records, '[]');
         // add hashes
-        $results = $this->addHashes($results);
+        $paths = $this->addHashes($groups);
         // combine into tree by dots
-        $results = $this->combineIntoTree($results, '.');
+        $tree = $this->combineIntoTree($paths, '.');
         // remove hashes
-        $results = $this->removeHashes($results);
-        return $results;
+        return $this->removeHashes($tree);
     }
 
     private function getMeta($statement): array
