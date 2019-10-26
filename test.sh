@@ -1,9 +1,6 @@
 #!/bin/bash
-if [ ! -f phpunit.phar ]; then
-  wget https://phar.phpunit.de/phpunit.phar
+if [ ! -f composer.phar ]; then
+  wget https://getcomposer.org/composer.phar
 fi
-export PDO_DRIVER_USERNAME=php-crud-api
-export PDO_DRIVER_PASSWORD=php-crud-api
-export PDO_DRIVER_DATABASE=php-crud-api
-php phpunit.phar
-
+php composer.phar install
+./vendor/bin/phpunit

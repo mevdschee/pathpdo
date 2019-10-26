@@ -13,8 +13,11 @@ class PdoTestCase extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $args = [getenv('PDO_DRIVER_USERNAME'), getenv('PDO_DRIVER_PASSWORD'), getenv('PDO_DRIVER_DATABASE')];
-        static::$pdo = forward_static_call_array(static::$class . '::create', $args);
+        $config = parse_ini_file("test_config.ini", true);
+        $dsn = $config['phpunit']['dsn'];
+        $username = $config['phpunit']['username'];
+        $password = $config['phpunit']['password'];
+        static::$pdo = new static::$class($dsn, $username, $password);
         static::$pdo->beginTransaction();
     }
 

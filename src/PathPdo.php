@@ -41,8 +41,8 @@ class PathPdo extends SimplePdo
             $name = $meta[$i]['name'];
             // enable auto-mode
             if (substr($name, 0, 1) != '$') {
-                $table = $meta[$i]['table'];
-                if ($tableCount > 1 && $table) {
+                if ($tableCount > 1 && isset($meta[$i]['table'])) {
+                    $table = $meta[$i]['table'];
                     $path = '$[].' . $table . '.' . $name;
                 } else {
                     $path = '$[].' . $name;
@@ -159,7 +159,7 @@ class PathPdo extends SimplePdo
         if (count($results)) {
             $hidden = array_merge(array_keys($values), array_keys($trees));
             if (count($hidden) > 0) {
-                throw new PathError('Path "' . $path . '.' . $hidden[0] . '" is hidden by path "' . $path . '[]"');
+                throw new PathError('The path "' . $path . '.' . $hidden[0] . '" is hidden by the path "' . $path . '[]"');
             }
             return $results;
         }
