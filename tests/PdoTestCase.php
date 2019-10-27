@@ -38,6 +38,6 @@ class PdoTestCase extends TestCase
     {
         static::$pdo->rollback();
     }
-    
+
 }
  

@@ -11,7 +11,7 @@ class SimplePdoTest extends PdoTestCase
      */
     public function testSelect($a, $b, $c, $expected)
     {
-        $this->assertEqualsCanonicalizing(json_decode($expected,true),$this->db->select($a, $b, $c));
+        $this->assertEqualsCanonicalizing(json_decode($expected,true), $this->db->select($a, $b, $c));
     }
 
     public function selectDataProvider()
