@@ -11,26 +11,26 @@ class PathPdoTest extends PdoTestCase
      */
     public function testQ($a, $b, $expected)
     {
-        $this->assertSame($expected, $this->jsonSort(json_encode($this->db->q($a, $b)),true));
+        $this->assertSame($expected, $this->jsonSort(json_encode($this->db->q($a, $b)),false,true));
     }
 
     public function qDataProvider()
     {
         return [
-            'single record no path' => ['select id, content from posts where id=?', [1], '[{"content":"blog started","id":1}]'],
+            'single record no path' => ['select id, content from posts where id=?', [1], '[{"id":1,"content":"blog started"}]'],
             'two records no path' => ['select id from posts where id<=2', [], '[{"id":1},{"id":2}]'],
             'two records named no path' => ['select id from posts where id<=:two and id>=:one', ['one' => 1, 'two' => 2], '[{"id":1},{"id":2}]'],
             'two tables no path' => [
                 'select posts.id, comments.id from posts left join comments on post_id = posts.id where posts.id=1', [],
-                '[{"comments":{"id":1},"posts":{"id":1}},{"comments":{"id":2},"posts":{"id":1}}]'
+                '[{"posts":{"id":1},"comments":{"id":1}},{"posts":{"id":1},"comments":{"id":2}}]'
             ],
             'two tables with path' => [
                 'select posts.id as "$[].posts.id", comments.id as "$[].comments.id" from posts left join comments on post_id = posts.id where posts.id=1', [],
-                '[{"comments":{"id":1},"posts":{"id":1}},{"comments":{"id":2},"posts":{"id":1}}]'
+                '[{"posts":{"id":1},"comments":{"id":1}},{"posts":{"id":1},"comments":{"id":2}}]'
             ],
             'posts with comments properly nested' => [
                 'select posts.id as "$.posts[].id", comments.id as "$.posts[].comments[].id" from posts left join comments on post_id = posts.id where posts.id<=2', [],
-                '{"posts":[{"comments":[{"id":1},{"id":2}],"id":1},{"comments":[{"id":3},{"id":4},{"id":5},{"id":6}],"id":2}]}'
+                '{"posts":[{"id":1,"comments":[{"id":1},{"id":2}]},{"id":2,"comments":[{"id":3},{"id":4},{"id":5},{"id":6}]}]}'
             ],
             'comments with post properly nested' => [
                 'select posts.id as "$.comments[].post.id", comments.id as "$.comments[].id" from posts left join comments on post_id = posts.id where posts.id<=2', [],
@@ -47,7 +47,7 @@ class PathPdoTest extends PdoTestCase
             'count posts with added root set in path' => ['select count(*) as "$.statistics.posts" from posts', [], '{"statistics":{"posts":12}}'],
             'count posts and comments as object with path' => [
                 'select (select count(*) from posts) as "$.stats.posts", (select count(*) from comments) as "$.stats.comments"', [],
-                '{"stats":{"comments":6,"posts":12}}'
+                '{"stats":{"posts":12,"comments":6}}'
             ],
         ];
     }
