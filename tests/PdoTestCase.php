@@ -39,10 +39,10 @@ class PdoTestCase extends TestCase
         static::$pdo->rollback();
     }
 
-    public function jsonSort(string $json, $sortLists=false)
+    public function jsonSort(string $json, bool $sortArrays=false)
     {
         $order = null;
-        $order = function ($json) use (&$order, $sortLists) { 
+        $order = function ($json) use (&$order, $sortArrays) { 
             foreach ($json as $key => $value) {
                 if (is_array($value) || is_object($value)) {
                     if (is_array($json)) {
@@ -52,7 +52,7 @@ class PdoTestCase extends TestCase
                     }
                 }
             }   
-            if ($sortLists && is_array($json)) {
+            if ($sortArrays && is_array($json)) {
                 usort($json,function ($a,$b) {
                     return json_encode($a)<=>json_encode($b);
                 });
