@@ -41,27 +41,20 @@ class PdoTestCase extends TestCase
 
     public function jsonSort(string $json)
     {
+        $strsum = function ($s) { return array_sum(array_map('ord', str_split($s))); };
         $order = null;
-        $order = function (&$json) use (&$order) {    
+        $order = function (&$json) use (&$order, $strsum) {    
             if (is_array($json)) {
-                usort($json,function ($a,$b) {
-                    $val = strlen(json_encode($a))<=>strlen(json_encode($b));
-                    if ($val==0) {
-                        $val = json_encode($a)<=>json_encode($b);
-                    }
-                    return $val;
+                usort($json,function ($a,$b) use ($strsum) {
+                    return $strsum(json_encode($a))<=>$strsum(json_encode($b));
                 });
                 foreach ($json as &$value) {
                     $order($value);
                 }
             } elseif (is_object($json)) {
                 $arr = (array) $json;
-                uksort($arr,function ($a,$b) use ($arr) {
-                    $val = strlen(json_encode([$a,$arr[$a]]))<=>strlen(json_encode([$b,$arr[$b]]));
-                    if ($val==0) {
-                        $val = json_encode([$a,$arr[$a]])<=>json_encode([$b,$arr[$b]]);
-                    }
-                    return $val;
+                uksort($arr,function ($a,$b) use ($arr, $strsum) {
+                    return $strsum(json_encode([$a => $arr[$a]]))<=>$strsum(json_encode([$b => $arr[$b]]));
                 });
                 $json = (object) $arr;
                 foreach ($json as &$value) {
