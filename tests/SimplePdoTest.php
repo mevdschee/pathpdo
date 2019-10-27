@@ -17,8 +17,8 @@ class SimplePdoTest extends PdoTestCase
     public function selectDataProvider()
     {
         return [
-            'full record' => ['posts', [], ['id' => 1], '[{"id":1,"user_id":1,"category_id":1,"content":"blog started"}]'],
-            'single record' => ['posts', ['id', 'content'], ['id' => 1], '[{"id":1,"content":"blog started"}]'],
+            'full record' => ['posts', [], ['id' => 1], '[{"category_id":1,"content":"blog started","id":1,"user_id":1}]'],
+            'single record' => ['posts', ['id', 'content'], ['id' => 1], '[{"content":"blog started","id":1}]'],
             'two records' => ['posts', ['id'], [['id', '>=', 1], ['id', '<=', 2]], '[{"id":1},{"id":2}]'],
         ];
     }
