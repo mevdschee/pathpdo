@@ -45,7 +45,7 @@ class PdoTestCase extends TestCase
             usort($json,function ($a,$b) {
                 $val = strlen(json_encode($a))<=>strlen(json_encode($b));
                 if ($val==0) {
-                    $val = md5(json_encode($a))<=>md5(json_encode($b));
+                    $val = json_encode($a)<=>json_encode($b);
                 }
                 return $val;
             });
@@ -57,7 +57,7 @@ class PdoTestCase extends TestCase
             uksort($arr,function ($a,$b) use ($arr) {
                 $val = strlen(json_encode([$a,$arr[$a]]))<=>strlen(json_encode([$b,$arr[$b]]));
                 if ($val==0) {
-                    $val = md5(json_encode([$a,$arr[$a]]))<=>md5(json_encode([$b,$arr[$b]]));
+                    $val = json_encode([$a,$arr[$a]])<=>json_encode([$b,$arr[$b]]);
                 }
                 return $val;
             });

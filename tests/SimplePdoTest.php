@@ -19,7 +19,7 @@ class SimplePdoTest extends PdoTestCase
         return [
             'full record' => ['posts', [], ['id' => 1], '[{"id":1,"user_id":1,"category_id":1,"content":"blog started"}]'],
             'single record' => ['posts', ['id', 'content'], ['id' => 1], '[{"id":1,"content":"blog started"}]'],
-            'two records' => ['posts', ['id'], [['id', '>=', 1], ['id', '<=', 2]], '[{"id":2},{"id":1}]'],
+            'two records' => ['posts', ['id'], [['id', '>=', 1], ['id', '<=', 2]], '[{"id":1},{"id":2}]'],
         ];
     }
 
