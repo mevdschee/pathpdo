@@ -11,7 +11,7 @@ class SimplePdoTest extends PdoTestCase
      */
     public function testSelect($a, $b, $c, $expected)
     {
-        $this->assertSame($expected, $this->jsonSort(json_encode($this->db->select($a, $b, $c))));
+        $this->assertSame($expected, $this->jsonSort(json_encode($this->db->select($a, $b, $c)),true));
     }
 
     public function selectDataProvider()

@@ -39,12 +39,12 @@ class PdoTestCase extends TestCase
         static::$pdo->rollback();
     }
 
-    public function jsonSort(string $json)
+    public function jsonSort(string $json, $sortLists=false)
     {
         $strsum = function ($s) { return array_sum(array_map('ord', str_split($s))); };
         $order = null;
-        $order = function (&$json) use (&$order, $strsum) {    
-            if (is_array($json)) {
+        $order = function (&$json) use (&$order, $strsum, $sortLists) {    
+            if ($sortLists && is_array($json)) {
                 usort($json,function ($a,$b) use ($strsum) {
                     return $strsum(json_encode($a))<=>$strsum(json_encode($b));
                 });
