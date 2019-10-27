@@ -11,7 +11,7 @@ class PathPdoTest extends PdoTestCase
      */
     public function testQ($a, $b, $expected)
     {
-        $this->assertSame($expected, $this->jsonSort(json_encode($this->db->q($a, $b)),false,true));
+        $this->assertEqualsCanonicalizing(json_decode($expected,true),$this->db->q($a, $b));
     }
 
     public function qDataProvider()
