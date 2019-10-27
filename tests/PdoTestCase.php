@@ -39,39 +39,38 @@ class PdoTestCase extends TestCase
         static::$pdo->rollback();
     }
 
-    private function jsonOrderedCopy(&$json)
-    {    
-        if (is_array($json)) {
-            usort($json,function ($a,$b) {
-                $val = strlen(json_encode($a))<=>strlen(json_encode($b));
-                if ($val==0) {
-                    $val = json_encode($a)<=>json_encode($b);
-                }
-                return $val;
-            });
-            foreach ($json as &$value) {
-                $this->jsonOrderedCopy($value);
-            }
-        } elseif (is_object($json)) {
-            $arr = (array) $json;
-            uksort($arr,function ($a,$b) use ($arr) {
-                $val = strlen(json_encode([$a,$arr[$a]]))<=>strlen(json_encode([$b,$arr[$b]]));
-                if ($val==0) {
-                    $val = json_encode([$a,$arr[$a]])<=>json_encode([$b,$arr[$b]]);
-                }
-                return $val;
-            });
-            $json = (object) $arr;
-            foreach ($json as &$value) {
-                $this->jsonOrderedCopy($value);
-            }
-        }
-    }
-
     public function jsonSort(string $json)
     {
+        $order = null;
+        $order = function (&$json) use (&$order) {    
+            if (is_array($json)) {
+                usort($json,function ($a,$b) {
+                    $val = strlen(json_encode($a))<=>strlen(json_encode($b));
+                    if ($val==0) {
+                        $val = json_encode($a)<=>json_encode($b);
+                    }
+                    return $val;
+                });
+                foreach ($json as &$value) {
+                    $order($value);
+                }
+            } elseif (is_object($json)) {
+                $arr = (array) $json;
+                uksort($arr,function ($a,$b) use ($arr) {
+                    $val = strlen(json_encode([$a,$arr[$a]]))<=>strlen(json_encode([$b,$arr[$b]]));
+                    if ($val==0) {
+                        $val = json_encode([$a,$arr[$a]])<=>json_encode([$b,$arr[$b]]);
+                    }
+                    return $val;
+                });
+                $json = (object) $arr;
+                foreach ($json as &$value) {
+                    $order($value);
+                }
+            }
+        };
         $json = json_decode($json);
-        $this->jsonOrderedCopy($json);
+        $order($json);
         return json_encode($json);
     }
 }
