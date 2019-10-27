@@ -11,7 +11,7 @@ class SimplePdoTest extends PdoTestCase
      */
     public function testSelect($a, $b, $c, $expected)
     {
-        $this->assertSame($expected, json_encode($this->db->select($a, $b, $c)));
+        $this->assertSame($expected, $this->jsonSort(json_encode($this->db->select($a, $b, $c))));
     }
 
     public function selectDataProvider()
@@ -19,7 +19,7 @@ class SimplePdoTest extends PdoTestCase
         return [
             'full record' => ['posts', [], ['id' => 1], '[{"id":1,"user_id":1,"category_id":1,"content":"blog started"}]'],
             'single record' => ['posts', ['id', 'content'], ['id' => 1], '[{"id":1,"content":"blog started"}]'],
-            'two records' => ['posts', ['id'], [['id', '>=', 1], ['id', '<=', 2]], '[{"id":1},{"id":2}]'],
+            'two records' => ['posts', ['id'], [['id', '>=', 1], ['id', '<=', 2]], '[{"id":2},{"id":1}]'],
         ];
     }
 
