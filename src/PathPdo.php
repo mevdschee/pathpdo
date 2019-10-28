@@ -99,7 +99,7 @@ class PathPdo extends SimplePdo
         }
         return $paths;
     }
-    
+
     private function getAllRecords($statement, $meta): array
     {
         $records = [];

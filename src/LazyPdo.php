@@ -22,7 +22,7 @@ class LazyPdo extends \PDO
         // explicitly NOT calling super::__construct
     }
 
-    public function addInitCommand(string $command)/*: void*/
+    public function addInitCommand(string $command) /*: void*/
     {
         $this->commands[] = $command;
     }
@@ -112,7 +112,7 @@ class LazyPdo extends \PDO
         return $this->pdo()->quote($string, $parameter_type);
     }
 
-    public function lastInsertId(/* ?string */$name = null): string
+    public function lastInsertId( /* ?string */$name = null): string
     {
         return $this->pdo()->lastInsertId($name);
     }
