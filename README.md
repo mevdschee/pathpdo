@@ -67,7 +67,7 @@ we only use a subset of the JSON path operators:
 Note that the brackets should always be empty as the index in the array is
 determined by the path merging algorithm.
 
-## Base paths
+## Base path
 
 The path "$[].posts.id" consists of two parts "$[].posts" (the base path) and 
 it's last segment "id" (the property name). Only columns that have an alias
