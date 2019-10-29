@@ -52,7 +52,7 @@ With PathQL the results will be (correct):
         ]
     }
 
-Note that PathQL implementations should not convert to JSON, but return native objects and arrays.
+Note that PathQL implementations should not convert to JSON strings.
 
 ## JSON path syntax
 
