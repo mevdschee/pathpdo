@@ -39,7 +39,7 @@ Results shown as pretty printed JSON:
         ]
     }
 
-while without PathQL results would have been:
+Without PathQL the results would have been:
 
     [
         {
