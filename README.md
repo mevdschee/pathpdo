@@ -52,7 +52,7 @@ With PathQL the results will be (correct):
         ]
     }
 
-Note that PathQL implementations should not convert to JSON strings.
+As you can see the rows are merged together into a tree.
 
 ## JSON path syntax
 
