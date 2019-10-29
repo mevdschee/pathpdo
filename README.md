@@ -67,11 +67,17 @@ we only use a subset of the JSON path operators:
 Note that the brackets should always be empty as the index in the array is
 determined by the path merging algorithm.
 
-## Auto mode
+## The base path
 
-If no alias starting with a "$" is specified, then PathQL will work in "auto" mode.
-Any query result originating from a single table will structured as 
-a simple object per result row:
+The path "$[].posts.id" consists of two parts "$[].posts" (the base path) and 
+it's last segment "id" (the property name). Only columns that have an alias
+starting with a "$" are defining a new base path. Any other alias or column 
+name is treated as a property name. 
+
+The full path of a column can be constructed by combining the last specified
+base path with the property name. The initial base path for every query is "$[]".
+
+Thus queries without specified paths generate a simple object per result row:
 
     SELECT * FROM posts;
 
@@ -83,27 +89,21 @@ a simple object per result row:
         ...(more rows)...
     ]
 
-Any query result originating from multiple tables will have the results 
-grouped by originating table for each result row.
+Columns that follow a column with a specified path will inherit the base path:
 
-    SELECT * FROM posts JOIN comments ON comments.post_id = posts.id;
+    SELECT id as "$[].post.id", title FROM posts;
 
     [
         {
-            "posts": {
+            "post": {
                 "id": 1,
                 "title": "Hello world!"
-            },
-            "comments": {
-                "id": 2,
-                "message": "great!"
             }
         },
         ...(more rows)...
     ]
 
-Note that merging of rows does not happen in "auto" mode and that the
-grouping is done on the originating table as reported by the driver.
+Note that duplicate and/or conflicting paths trigger an error message.
 
 ## Implementations
 

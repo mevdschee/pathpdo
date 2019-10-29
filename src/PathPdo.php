@@ -33,11 +33,10 @@ class PathPdo extends SimplePdo
     private function getMeta($statement): array
     {
         $columns = $this->getColumns($statement);
-        $tables = $this->getTables($statement);
-        $paths = $this->getPaths($columns, $tables);
+        $paths = $this->getPaths($columns);
         $meta = [];
         foreach ($columns as $i => $column) {
-            $meta[] = ['name' => $column, 'table' => $tables[$i], 'path' => $paths[$i]];
+            $meta[] = ['name' => $column, 'path' => $paths[$i]];
         }
         return $meta;
     }
@@ -51,51 +50,20 @@ class PathPdo extends SimplePdo
         return $columns;
     }
 
-    private function getTables($statement): array
-    {
-        $tables = [];
-        $tableOids = [];
-        for ($i = 0; $i < $statement->columnCount(); $i++) {
-            $column = $statement->getColumnMeta($i);
-            $tableName = '';
-            if (isset($column['table'])) {
-                $tableName = $column['table'];
-            } elseif (isset($column['pgsql:table_oid'])) {
-                $tableOid = $column['pgsql:table_oid'];
-                if (isset($tableOids[$tableOid])) {
-                    $tableName = $tableOids[$tableOid];
-                } else {
-                    $result = parent::q('select relname from pg_class where oid=:oid', ['oid' => $tableOid]);
-                    if ($result) {
-                        $tableName = $result[0][0];
-                    }
-                    $tableOids[$tableOid] = $tableName;
-                }
-            }
-            $tables[] = $tableName;
-        }
-        return $tables;
-    }
-
-    private function getTableCount($tables): int
-    {
-        return count(array_filter(array_unique($tables)));
-    }
-
-    private function getPaths($columns, $tables): array
+    private function getPaths($columns): array
     {
         $paths = [];
-        $tableCount = $this->getTableCount($tables);
+        $path = '$[]';
         foreach ($columns as $i => $column) {
-            if (substr($column, 0, 1) != '$') {
-                if ($tableCount > 1 && $tables[$i]) {
-                    $paths[] = '$[].' . $tables[$i] . '.' . $column;
-                } else {
-                    $paths[] = '$[].' . $column;
+            $prop = $column;
+            if (substr($column, 0, 1) == '$') {
+                $pos = strrpos($column, '.');
+                if ($pos !== false) {
+                    $path = substr($column, 0, $pos);
+                    $prop = substr($column, $pos + 1);
                 }
-            } else {
-                $paths[] = $column;
             }
+            $paths[] = $path . '.' . $prop;
         }
         return $paths;
     }
