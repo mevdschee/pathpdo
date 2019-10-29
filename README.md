@@ -54,6 +54,57 @@ while without PathQL results would have been:
 
 Got it?
 
+## JSON path syntax
+
+In JSON path a language is defined for reading data from a path in a JSON document.
+We need a langauge to write data to a path in a JSON document and that is why
+we only use a subset of the JSON path operators:
+
+- "$" root element
+- "." object child operator
+- "[]" array element operator
+
+Note that the brackets should always be empty as the index in the array is
+determined by the path merging algorithm.
+
+## Auto mode
+
+If no alias starting with a "$" is specified, then PathQL will work in "auto" mode.
+Any query result originating from a single table will structured as 
+a simple object per result row:
+
+    SELECT * FROM posts;
+
+    [
+        {
+            "id": 1,
+            "title": "Hello world!"
+        },
+        ...(more rows)...
+    ]
+
+Any query result originating from multiple tables will have the results 
+grouped by originating table for each result row.
+
+    SELECT * FROM posts JOIN comments ON comments.post_id = posts.id;
+
+    [
+        {
+            "posts": {
+                "id": 1,
+                "title": "Hello world!"
+            },
+            "comments": {
+                "id": 2,
+                "message": "great!"
+            }
+        },
+        ...(more rows)...
+    ]
+
+Note that merging of rows does not happen in "auto" mode and that the
+grouping is done on the originating table as reported by the driver.
+
 ## Implementations
 
 Currently PathQL is implemented in PHP and Python for MySQL and PostgreSQL.
