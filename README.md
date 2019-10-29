@@ -129,6 +129,7 @@ You can also "speak" PathQL over HTTP(S). Here we specify how this should be don
 The response will be:
 
     Content-Type: application/json
+    
     {"posts":[{"id":1,"comments":[{"id":1},{"id":2}]}]}
 
 As you can see you should make an endpoint named "pathql" that accepts and returns JSON.
