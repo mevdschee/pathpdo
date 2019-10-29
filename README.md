@@ -21,7 +21,20 @@ This is what PathQL does in one example:
         post_id = posts.id and
         posts.id = 1 
 
-Results shown as pretty printed JSON:
+Without PathQL the results would be (wrong):
+
+    [
+        {
+          "$.posts[].id": 1,
+          "$.posts[].comments[].id": 1
+        },
+        {
+          "$.posts[].id": 1,
+          "$.posts[].comments[].id": 2
+        }
+    ]
+
+With PathQL the results will be (correct):
 
     {
         "posts": [
@@ -39,20 +52,7 @@ Results shown as pretty printed JSON:
         ]
     }
 
-Without PathQL the results would have been:
-
-    [
-        {
-          "$.posts[].id": 1,
-          "$.posts[].comments[].id": 1
-        },
-        {
-          "$.posts[].id": 1,
-          "$.posts[].comments[].id": 2
-        }
-    ]
-
-Got it?
+Note that PathQL implementations should not convert to JSON, but return native objects and arrays.
 
 ## JSON path syntax
 
