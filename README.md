@@ -114,7 +114,7 @@ Currently PathQL is implemented in PHP and Python for MySQL and PostgreSQL.
 
 The PHP version depends on PDO, while the Python version depends on SqlAlchemy.
 
-## HTTP API
+## PathQL over HTTP (as a web API)
 
 As we have seen in the implementations, PathQL can be added seemlessly to a DBAL.
 
