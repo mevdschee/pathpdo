@@ -113,3 +113,25 @@ Currently PathQL is implemented in PHP and Python for MySQL and PostgreSQL.
 - [path-alchemy](https://github.com/mevdschee/path-alchemy)
 
 The PHP version depends on PDO, while the Python version depends on SqlAlchemy.
+
+## HTTP API
+
+As we have seen in the implementations, PathQL can be added seemlessly to a DBAL.
+
+You can also "speak" PathQL over HTTP(S). Here we specify how this should be done:
+
+    POST /pathql HTTP/1.1
+    Content-Type: application/json
+
+    {"query":"select posts.id as \"$.posts[].id\", comments.id as \"$.posts[].comments[].id\" 
+    from posts, comments where post_id = posts.id and posts.id = :id;","params":{"id":1}}
+
+The response will be:
+
+    Content-Type: application/json
+    {"posts":[{"id":1,"comments":[{"id":1},{"id":2}]}]}
+
+As you can see you should make an endpoint named "pathql" that accepts and returns JSON.
+The request should be sent in the POST body as a JSON object with properties "query" and
+"params", where "query" must be a (SQL) string with named parameters and "params" must be
+the set of named parameters that should be applied.
