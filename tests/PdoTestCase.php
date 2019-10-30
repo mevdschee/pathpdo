@@ -19,7 +19,7 @@ class PdoTestCase extends TestCase
         $database = $config['phpunit']['database'];
         $driver = $config['phpunit']['driver'];
         $address = $config['phpunit']['address'];
-        $port = $config['phpunit']['port'] + 0;
+        $port = $config['phpunit']['port'];
         static::$pdo = static::$class::create($username, $password, $database, $driver, $address, $port);
         static::$pdo->beginTransaction();
     }
@@ -38,5 +38,4 @@ class PdoTestCase extends TestCase
     {
         static::$pdo->rollback();
     }
-
 }
