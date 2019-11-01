@@ -1,5 +1,5 @@
 {
-    "name": "mevdschee/pdo-json",
+    "name": "mevdschee/pathpdo",
     "type": "library",
     "description": "JSON interface to a PDO connected SQL database.",
     "keywords": [
@@ -7,7 +7,7 @@
       "database",
       "sql-database"
     ],
-    "homepage": "https://github.com/mevdschee/pdo-json",
+    "homepage": "https://github.com/mevdschee/pathpdo",
     "license": "MIT",
     "authors": [
       {
