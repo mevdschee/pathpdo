@@ -22,7 +22,7 @@ class PathPdo extends SimplePdo
         $hashes = $this->addHashes($groups);
         $tree = $this->combineIntoTree($hashes, '.');
         $result = $this->removeHashes($tree, '$');
-        return $result
+        return $result;
     }
 
     private function getColumns($statement): array
