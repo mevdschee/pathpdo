@@ -25,9 +25,9 @@ class PathPdo extends SimplePdo
         // group by brackets
         $groups = $this->groupBySeparator($records, '[]');
         // add hashes
-        $paths = $this->addHashes($groups);
+        $hashes = $this->addHashes($groups);
         // combine into tree by dots
-        $tree = $this->combineIntoTree($paths, '.');
+        $tree = $this->combineIntoTree($hashes, '.');
         // remove hashes
         return $this->removeHashes($tree);
     }
