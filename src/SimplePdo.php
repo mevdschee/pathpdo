@@ -13,7 +13,7 @@ class SimplePdo extends SmartPdo
         $sql = 'INSERT INTO ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlInsertFields($record) . ' VALUES ';
         $sql .= $this->buildSqlInsertValues($params, $record) . ' ';
-        return $this->q($sql, $params, false, true);
+        return $this->smartQuery($sql, $params, false, true);
     }
 
     public function select($table, $fields = [], $conditions = []): array
@@ -25,7 +25,7 @@ class SimplePdo extends SmartPdo
         $sql = 'SELECT ' . $this->buildSqlSelect($fields) . ' ';
         $sql .= 'FROM ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        return $this->q($sql, $params, false, false);
+        return $this->smartQuery($sql, $params, false, false);
     }
 
     public function update($table, $fields, $conditions): int
@@ -37,7 +37,7 @@ class SimplePdo extends SmartPdo
         $sql = 'UPDATE ' . $this->quoteIdentifier($table) . ' ';
         $sql .= 'SET ' . $this->buildSqlSet($params, $fields) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        return $this->q($sql, $params, true, false);
+        return $this->smartQuery($sql, $params, true, false);
     }
 
     public function delete($table, $conditions): int
@@ -48,7 +48,7 @@ class SimplePdo extends SmartPdo
         $params = [];
         $sql = 'DELETE FROM ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        return $this->q($sql, $params, true);
+        return $this->smartQuery($sql, $params, true);
     }
 
     public function quoteIdentifier(string $string): string
