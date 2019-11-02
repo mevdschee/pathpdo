@@ -16,10 +16,12 @@ class PathPdo extends SimplePdo
             $statement = $this->prepare($query);
             $statement->execute($params);
         }
-        // get meta
-        $meta = $this->getMeta($statement);
+        // get columns
+        $columns = $this->getColumns($statement);
+        // get paths
+        $paths = $this->getPaths($columns);
         // get all record paths
-        $records = $this->getAllRecords($statement, $meta);
+        $records = $this->getAllRecords($statement, $paths);
         // group by brackets
         $groups = $this->groupBySeparator($records, '[]');
         // add hashes
@@ -28,17 +30,6 @@ class PathPdo extends SimplePdo
         $tree = $this->combineIntoTree($paths, '.');
         // remove hashes
         return $this->removeHashes($tree);
-    }
-
-    private function getMeta($statement): array
-    {
-        $columns = $this->getColumns($statement);
-        $paths = $this->getPaths($columns);
-        $meta = [];
-        foreach ($columns as $i => $column) {
-            $meta[] = ['name' => $column, 'path' => $paths[$i]];
-        }
-        return $meta;
     }
 
     private function getColumns($statement): array
@@ -68,14 +59,13 @@ class PathPdo extends SimplePdo
         return $paths;
     }
 
-    private function getAllRecords($statement, $meta): array
+    private function getAllRecords($statement, $paths): array
     {
         $records = [];
         while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
             $record = [];
             foreach ($row as $i => $value) {
-                $path = $meta[$i]['path'];
-                $record[substr($path, 1)] = $value;
+                $record[substr($paths[$i], 1)] = $value;
             }
             $records[] = $record;
         }
