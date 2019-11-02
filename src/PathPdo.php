@@ -4,11 +4,8 @@ namespace Tqdev\PdoJson;
 
 class PathPdo extends SimplePdo
 {
-    public function q(string $query, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
+    public function pathQuery(string $query, array $params = [])
     {
-        if ($returnNumAffected || $returnLastInsertId) {
-            return parent::q($query, $params, $returnNumAffected, $returnLastInsertId);
-        }
         if (empty($params)) {
             $statement = $this->query($query);
         } else {

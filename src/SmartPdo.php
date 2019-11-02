@@ -41,7 +41,7 @@ class SmartPdo extends LazyPdo
         return new static($dsn, $username, $password, $options);
     }
 
-    public function q(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
+    public function smartQuery(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
     {
         if (empty($params)) {
             $stmt = $this->query($statement);
