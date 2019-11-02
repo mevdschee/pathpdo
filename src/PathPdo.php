@@ -9,27 +9,20 @@ class PathPdo extends SimplePdo
         if ($returnNumAffected || $returnLastInsertId) {
             return parent::q($query, $params, $returnNumAffected, $returnLastInsertId);
         }
-        // query
         if (empty($params)) {
             $statement = $this->query($query);
         } else {
             $statement = $this->prepare($query);
             $statement->execute($params);
         }
-        // get columns
         $columns = $this->getColumns($statement);
-        // get paths
         $paths = $this->getPaths($columns);
-        // get all record paths
         $records = $this->getAllRecords($statement, $paths);
-        // group by brackets
         $groups = $this->groupBySeparator($records, '[]');
-        // add hashes
         $hashes = $this->addHashes($groups);
-        // combine into tree by dots
         $tree = $this->combineIntoTree($hashes, '.');
-        // remove hashes
-        return $this->removeHashes($tree, '$');
+        $result = $this->removeHashes($tree, '$');
+        return $result
     }
 
     private function getColumns($statement): array
