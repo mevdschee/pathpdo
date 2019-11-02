@@ -29,7 +29,7 @@ class PathPdo extends SimplePdo
         // combine into tree by dots
         $tree = $this->combineIntoTree($hashes, '.');
         // remove hashes
-        return $this->removeHashes($tree);
+        return $this->removeHashes($tree, '$');
     }
 
     private function getColumns($statement): array
@@ -138,7 +138,7 @@ class PathPdo extends SimplePdo
         return $results[''];
     }
 
-    private function removeHashes($tree, $path = '$'): array
+    private function removeHashes($tree, $path): array
     {
         $values = [];
         $trees = [];
