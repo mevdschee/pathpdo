@@ -7,14 +7,14 @@ class PathPdoTest extends PdoTestCase
     static $class = '\Tqdev\PdoJson\PathPdo';
 
     /**
-     * @dataProvider qDataProvider
+     * @dataProvider pathQueryDataProvider
      */
-    public function testQ($a, $b, $expected)
+    public function testPathQuery($a, $b, $expected)
     {
         $this->assertSame($expected, json_encode($this->db->pathQuery($a, $b)));
     }
 
-    public function qDataProvider()
+    public function pathQueryDataProvider()
     {
         return [
             'single record no path' => ['select id, content from posts where id=?', [1], '[{"id":1,"content":"blog started"}]'],
