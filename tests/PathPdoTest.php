@@ -7,15 +7,15 @@ class PathPdoTest extends PdoTestCase
     static $class = '\Tqdev\PdoJson\PathPdo';
 
     /**
-     * @dataProvider qDataProvider
+     * @dataProvider pathQueryDataProvider
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('qDataProvider')]
-    public function testQ($query, $params, $expected)
+    #[\PHPUnit\Framework\Attributes\DataProvider('pathQueryDataProvider')]
+    public function testPathQuery($a, $b, $expected)
     {
-        $this->assertSame($expected, json_encode($this->db->pathQuery($query, $params)));
+        $this->assertSame($expected, json_encode($this->db->pathQuery($a, $b)));
     }
 
-    public static function qDataProvider(): array
+    public static function pathQueryDataProvider()
     {
         return [
             // --- No-path flat array (fast path, no "$" aliases) ---
