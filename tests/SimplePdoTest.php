@@ -9,12 +9,13 @@ class SimplePdoTest extends PdoTestCase
     /**
      * @dataProvider selectDataProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('selectDataProvider')]
     public function testSelect($a, $b, $c, $expected)
     {
         $this->assertEqualsCanonicalizing(json_decode($expected, true), $this->db->select($a, $b, $c));
     }
 
-    public function selectDataProvider()
+    public static function selectDataProvider(): array
     {
         return [
             'full record' => ['posts', [], ['id' => 1], '[{"id":1,"user_id":1,"category_id":1,"content":"blog started"}]'],
@@ -26,12 +27,13 @@ class SimplePdoTest extends PdoTestCase
     /**
      * @dataProvider insertDataProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('insertDataProvider')]
     public function testInsert($a, $b)
     {
         $this->assertIsInt($this->db->insert($a, $b));
     }
 
-    public function insertDataProvider()
+    public static function insertDataProvider(): array
     {
         return [
             'insert posts record' => ['posts', ['user_id' => 1, 'category_id' => 1, 'content' => 'blog started']],

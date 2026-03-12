@@ -58,7 +58,7 @@ class LazyPdo extends \PDO
         return $this->pdo && parent::inTransaction();
     }
 
-    public function setAttribute($attribute, $value): bool
+    public function setAttribute(int $attribute, mixed $value): bool
     {
         if ($this->pdo) {
             return $this->pdo()->setAttribute($attribute, $value);
@@ -67,7 +67,7 @@ class LazyPdo extends \PDO
         return true;
     }
 
-    public function getAttribute($attribute): mixed
+    public function getAttribute(int $attribute): mixed
     {
         return $this->pdo()->getAttribute($attribute);
     }
@@ -87,7 +87,7 @@ class LazyPdo extends \PDO
         return $this->pdo()->rollBack();
     }
 
-    public function errorCode(): mixed
+    public function errorCode(): ?string
     {
         return $this->pdo()->errorCode();
     }
@@ -97,28 +97,28 @@ class LazyPdo extends \PDO
         return $this->pdo()->errorInfo();
     }
 
-    public function exec($query): int
+    public function exec(string $statement): int|false
     {
-        return $this->pdo()->exec($query);
+        return $this->pdo()->exec($statement);
     }
 
-    public function prepare($statement, $options = array())
+    public function prepare(string $query, array $options = []): \PDOStatement|false
     {
-        return $this->pdo()->prepare($statement, $options);
+        return $this->pdo()->prepare($query, $options);
     }
 
-    public function quote($string, $parameter_type = null): string
+    public function quote(string $string, int $type = \PDO::PARAM_STR): string|false
     {
-        return $this->pdo()->quote($string, $parameter_type);
+        return $this->pdo()->quote($string, $type);
     }
 
-    public function lastInsertId( /* ?string */$name = null): string
+    public function lastInsertId(?string $name = null): string|false
     {
         return $this->pdo()->lastInsertId($name);
     }
 
-    public function query(string $statement): \PDOStatement
+    public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs): \PDOStatement|false
     {
-        return call_user_func_array(array($this->pdo(), 'query'), func_get_args());
+        return $this->pdo()->query($query, $fetchMode, ...$fetchModeArgs);
     }
 }

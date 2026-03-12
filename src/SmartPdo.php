@@ -22,6 +22,12 @@ class SmartPdo extends LazyPdo
         }
     }
 
+    public function getDriver(): string
+    {
+        return $this->driver;
+    }
+
+
     public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array())
     {
         switch ($driver) {

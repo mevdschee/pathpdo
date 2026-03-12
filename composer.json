@@ -1,32 +1,36 @@
 {
-    "name": "mevdschee/pathpdo",
-    "type": "library",
-    "description": "JSON interface to a PDO connected SQL database.",
-    "keywords": [
-      "rest-api",
-      "database",
-      "sql-database"
-    ],
-    "homepage": "https://github.com/mevdschee/pathpdo",
-    "license": "MIT",
-    "authors": [
-      {
-        "name": "Maurits van der Schee",
-        "email": "maurits@vdschee.nl",
-        "homepage": "https://github.com/mevdschee"
-      }
-    ],
-    "require": {
-      "php": ">=7.0.0",
-      "ext-pdo": "*"
-    },
-    "require-dev": {
-      "phpunit/phpunit": "*"
-    },
-    "autoload": {
-        "psr-4": { "Tqdev\\PdoJson\\": "src/" }
-    },
-    "autoload-dev": {
-      "psr-4": { "Tqdev\\PdoJson\\Tests\\": "tests/" }
+  "name": "mevdschee/pathpdo",
+  "type": "library",
+  "description": "JSON interface to a PDO connected SQL database.",
+  "keywords": [
+    "rest-api",
+    "database",
+    "sql-database"
+  ],
+  "homepage": "https://github.com/mevdschee/pathpdo",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Maurits van der Schee",
+      "email": "maurits@vdschee.nl",
+      "homepage": "https://github.com/mevdschee"
     }
+  ],
+  "require": {
+    "php": ">=8.0.0",
+    "ext-pdo": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tqdev\\PdoJson\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tqdev\\PdoJson\\Tests\\": "tests/"
+    }
+  }
 }
