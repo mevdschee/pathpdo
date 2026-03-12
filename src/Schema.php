@@ -4,8 +4,126 @@ namespace Tqdev\PdoJson;
 
 class Schema
 {
+    /** @var string|null */
+    private static $metadataFile = null;
+
+    /** @var array<string, array>|null */
+    private static $fileMetadata = null;
+
     /** @var array<string, array> */
-    private $foreignKeysCache = [];
+    private static $foreignKeysCache = [];
+
+    /**
+     * Set the metadata file path. If set, metadata will be loaded from this file
+     * instead of querying the database. Set to null to use database.
+     * 
+     * @param string|null $filename Path to metadata file (JSON or PHP array format)
+     */
+    public static function setMetadataFile(?string $filename): void
+    {
+        self::$metadataFile = $filename;
+        self::$fileMetadata = null; // Clear cache when changing file
+    }
+
+    /**
+     * Get the current metadata file path.
+     * 
+     * @return string|null
+     */
+    public static function getMetadataFile(): ?string
+    {
+        return self::$metadataFile;
+    }
+
+    /**
+     * Clear the in-memory foreign keys cache.
+     * Useful for testing or when schema changes are expected.
+     */
+    public static function clearCache(): void
+    {
+        self::$foreignKeysCache = [];
+        self::$fileMetadata = null;
+    }
+
+    /**
+     * Load metadata from the configured file.
+     * 
+     * @return array<string, array>
+     * @throws \RuntimeException
+     */
+    private static function loadMetadataFromFile(): array
+    {
+        if (self::$fileMetadata !== null) {
+            return self::$fileMetadata;
+        }
+
+        if (self::$metadataFile === null) {
+            return [];
+        }
+
+        if (!file_exists(self::$metadataFile)) {
+            throw new \RuntimeException("Metadata file not found: " . self::$metadataFile);
+        }
+
+        $contents = file_get_contents(self::$metadataFile);
+        if ($contents === false) {
+            throw new \RuntimeException("Failed to read metadata file: " . self::$metadataFile);
+        }
+
+        // Try JSON first
+        $data = json_decode($contents, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+            self::$fileMetadata = $data;
+            return $data;
+        }
+
+        // Try PHP file format (starts with <?php)
+        if (str_starts_with(trim($contents), '<?php')) {
+            $data = include self::$metadataFile;
+            if (is_array($data)) {
+                self::$fileMetadata = $data;
+                return $data;
+            }
+        }
+
+        throw new \RuntimeException("Invalid metadata file format: " . self::$metadataFile);
+    }
+
+    /**
+     * Save metadata to a file.
+     * 
+     * @param string $filename Path to save metadata to
+     * @param array $metadata Metadata array to save
+     * @param string $format Format: 'json' or 'php' (default: 'json')
+     * @throws \RuntimeException
+     */
+    public static function saveMetadataToFile(string $filename, array $metadata, string $format = 'json'): void
+    {
+        if ($format === 'json') {
+            $contents = json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        } else {
+            $contents = "<?php\nreturn " . var_export($metadata, true) . ";\n";
+        }
+
+        if (file_put_contents($filename, $contents) === false) {
+            throw new \RuntimeException("Failed to write metadata file: " . $filename);
+        }
+    }
+
+    /**
+     * Export current database metadata to a file.
+     * 
+     * @param SmartPdo $db Database connection
+     * @param string $filename Path to save metadata to
+     * @param string $format Format: 'json' or 'php' (default: 'json')
+     */
+    public function exportMetadata(SmartPdo $db, string $filename, string $format = 'json'): void
+    {
+        $metadata = [
+            'foreign_keys' => $this->getForeignKeysFromDatabase($db),
+        ];
+        self::saveMetadataToFile($filename, $metadata, $format);
+    }
 
     /**
      * Gets all foreign keys for the current database.
@@ -17,10 +135,37 @@ class Schema
      */
     public function getForeignKeys(SmartPdo $db): array
     {
+        // Check if we should use file-based metadata
+        if (self::$metadataFile !== null) {
+            return $this->getForeignKeysFromFile();
+        }
+
+        return $this->getForeignKeysFromDatabase($db);
+    }
+
+    /**
+     * Get foreign keys from configured metadata file.
+     * 
+     * @return array
+     */
+    private function getForeignKeysFromFile(): array
+    {
+        $metadata = self::loadMetadataFromFile();
+        return $metadata['foreign_keys'] ?? [];
+    }
+
+    /**
+     * Get foreign keys by querying the database.
+     * 
+     * @param SmartPdo $db
+     * @return array
+     */
+    private function getForeignKeysFromDatabase(SmartPdo $db): array
+    {
         $driver = $db->getDriver();
 
-        if (isset($this->foreignKeysCache[$driver])) {
-            return $this->foreignKeysCache[$driver];
+        if (isset(self::$foreignKeysCache[$driver])) {
+            return self::$foreignKeysCache[$driver];
         }
 
         $fks = [];
@@ -73,10 +218,10 @@ class Schema
                 ";
                 $fks = $db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
                 break;
-            // Add sqlite fallback later if needed.
+                // Add sqlite fallback later if needed.
         }
 
-        $this->foreignKeysCache[$driver] = $fks;
+        self::$foreignKeysCache[$driver] = $fks;
         return $fks;
     }
 }
