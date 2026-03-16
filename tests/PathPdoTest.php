@@ -26,8 +26,8 @@ class PathPdoTest extends PdoTestCase
                 '[{"id":1,"content":"blog started"}]',
             ],
             'two records no path' => [
-                'select id from posts where id<=2 order by id',
-                [],
+                'select id from posts where id<=:id order by id',
+                ['id' => 2],
                 '[{"id":1},{"id":2}]',
             ],
             'two records named params no path' => [
@@ -142,9 +142,9 @@ class PathPdoTest extends PdoTestCase
             'SELECT p.id, c.id, c.message 
              FROM posts p 
              LEFT JOIN comments c ON c.post_id = p.id 
-             WHERE p.id = 1 
+             WHERE p.id = :id
              ORDER BY c.id',
-            [],
+            ['id' => 1],
             [
                 'p' => '$',
                 'c' => '$.comments[]'
@@ -169,9 +169,9 @@ class PathPdoTest extends PdoTestCase
             'SELECT p.id, c.id 
              FROM posts p -- PATH p $.wrong
              LEFT JOIN comments c ON c.post_id = p.id -- PATH c $.wrong[]
-             WHERE p.id = 1 
+             WHERE p.id = ?
              ORDER BY c.id',
-            [],
+            [1],
             [
                 'p' => '$',
                 'c' => '$.comments[]'
@@ -196,9 +196,9 @@ class PathPdoTest extends PdoTestCase
             'SELECT p.id, c.id, c.message 
              FROM posts p 
              LEFT JOIN comments c ON c.post_id = p.id 
-             WHERE p.id = 2 
+             WHERE p.id = :id 
              ORDER BY c.id',
-            [],
+            ['id' => 2],
             [
                 'p' => '$.data',
                 'c' => '$.data.comments[]'
@@ -216,8 +216,8 @@ class PathPdoTest extends PdoTestCase
     {
         // Test array at root level
         $result = $this->db->pathQuery(
-            'SELECT p.id, p.content FROM posts p WHERE p.id <= 2 ORDER BY p.id',
-            [],
+            'SELECT p.id, p.content FROM posts p WHERE p.id <= :id ORDER BY p.id',
+            ['id' => 2],
             ['p' => '$[]']
         );
 
@@ -232,9 +232,8 @@ class PathPdoTest extends PdoTestCase
     {
         // Empty paths parameter should work like normal query
         $result = $this->db->pathQuery(
-            'SELECT id, content FROM posts WHERE id = 1',
-            [],
-            []
+            'SELECT id, content FROM posts WHERE id = :id',
+            ['id' => 1]
         );
 
         $this->assertEquals([['id' => 1, 'content' => 'blog started']], $result);

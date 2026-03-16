@@ -137,30 +137,14 @@ $results = $db->pathQuery(
     'SELECT p.id, c.id, c.content 
      FROM posts p 
      LEFT JOIN comments c ON c.post_id = p.id 
-     WHERE p.id = 1',
-    [],  // No query parameters
+     WHERE p.id = :id',
+    ['id' => 1],  // Named query parameters
     [    // Path mapping
         'p' => '$',
         'c' => '$.comments[]'
     ]
 );
 // Returns: {"id": 1, "comments": [{"id": 1, "content": "..."}, {"id": 2, "content": "..."}]}
-```
-
-### Specifying Paths with SQL Comments
-
-Alternatively, you can use SQL comments to specify paths (useful when you can't
-modify the pathQuery call):
-
-```php
-$results = $db->pathQuery('
-    SELECT p.id, c.id, c.content 
-    FROM posts p
-    LEFT JOIN comments c ON c.post_id = p.id 
-    WHERE p.id = 1
-    -- PATH p $
-    -- PATH c $.comments[]
-');
 ```
 
 ### Path Syntax
@@ -188,8 +172,8 @@ $results = $db->pathQuery(
      FROM users u
      LEFT JOIN posts p ON p.user_id = u.id
      LEFT JOIN comments c ON c.post_id = p.id
-     WHERE u.id = 1',
-    [],
+     WHERE u.id = ?',
+    [1], // Ordered query parameters
     [
         'u' => '$',
         'p' => '$.posts[]',
