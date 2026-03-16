@@ -119,11 +119,12 @@ hierarchical structure based on table relationships:
 $db = PathPdo::create($username, $password, $database);
 
 // Simple query
-$results = $db->pathQuery('SELECT id, name FROM users');
+$results = $db->pathQuery('SELECT `id`,`name` FROM `users`');
 // Returns: [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
 
 // With parameters
-$results = $db->pathQuery('SELECT id, name FROM users WHERE id = ?', [1]);
+$results = $db->pathQuery('SELECT * FROM users WHERE id = :id', ['id' => 1]);
+$results = $db->pathQuery('SELECT * FROM users WHERE id = ?', [1]);
 ```
 
 ### Specifying Paths with Array Parameter
