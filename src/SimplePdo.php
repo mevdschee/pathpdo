@@ -136,8 +136,7 @@ class SimplePdo extends SmartPdo
             } elseif (is_array($value) && count($value) == 3) {
                 list($name, $operator, $value) = $value;
             } else {
-                $args[] = '1 = 0';
-                continue;
+                throw new \InvalidArgumentException('Invalid condition format: ' . json_encode($value));
             }
             $name = $this->quoteIdentifier($name);
             $operator = $this->selectOperator($operator);
