@@ -40,7 +40,7 @@ class PathInference
     }
 
     /**
-     * @return array<string, bool>
+     * @return array<string,bool>
      */
     private function buildCardinalityMap(QueryAnalyzer $analysis, SmartPdo $db): array
     {
@@ -103,7 +103,7 @@ class PathInference
 
     /**
      * @param array<string,mixed> $join
-     * @param array<int, array<string, string>> $allFks
+     * @param array<int, array<string,string>> $allFks
      */
     private function isOneToManyJoin(array $join, array $allFks): bool
     {
@@ -144,7 +144,7 @@ class PathInference
     }
 
     /**
-     * @param array<string, bool> $cardinality
+     * @param array<string,bool> $cardinality
      */
     private function inferColumnPath(string $column, QueryAnalyzer $analysis, array $cardinality): string
     {
@@ -265,7 +265,7 @@ class PathInference
     }
 
     /**
-     * @param array<string, bool> $cardinality
+     * @param array<string,bool> $cardinality
      */
     private function buildPathToTable(string $targetAlias, QueryAnalyzer $analysis, array $cardinality): string
     {
@@ -274,8 +274,8 @@ class PathInference
     }
 
     /**
-     * @param array<string, bool> $cardinality
-     * @param array<string, bool> $visited
+     * @param array<string,bool> $cardinality
+     * @param array<string,bool> $visited
      */
     private function buildPathRecursive(string $targetAlias, QueryAnalyzer $analysis, array $cardinality, array &$visited): string
     {

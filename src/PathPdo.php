@@ -66,7 +66,7 @@ class PathPdo extends SimplePdo
      * 
      * @param string $query The SQL query to execute
      * @param array<int|string,mixed> $params Parameters for prepared statement
-     * @param array<string, string> $paths Optional path mappings for table aliases (overrides SQL comment hints)
+     * @param array<string,string> $paths Optional path mappings for table aliases (overrides SQL comment hints)
      *                     Format: ['alias' => '$.path', 'other' => '$.parent.child[]']
      * @return array<int|string,mixed> Hierarchical result structure based on inferred paths
      * @throws \RuntimeException If query execution fails
@@ -217,7 +217,7 @@ class PathPdo extends SimplePdo
 
     /**
      * @param array<int, array<int|string,mixed>> $records
-     * @return array<int, array<string, array<string,mixed>>>
+     * @return array<int, array<string,array<string,mixed>>>
      */
     private function groupBySeparator(array $records, string $separator): array
     {
@@ -242,7 +242,7 @@ class PathPdo extends SimplePdo
     }
 
     /**
-     * @param array<int, array<string, array<string,mixed>>> $records
+     * @param array<int, array<string,array<string,mixed>>> $records
      * @return array<int, array<int|string,mixed>>
      */
     private function addHashes(array $records): array

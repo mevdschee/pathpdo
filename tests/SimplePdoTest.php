@@ -22,7 +22,7 @@ class SimplePdoTest extends PdoTestCase
     }
 
     /**
-     * @return array<string, array{0: string, 1: array<int,string>, 2: array<int|string,mixed>, 3: string}>
+     * @return array<string,array{0: string, 1: array<int,string>, 2: array<int|string,mixed>, 3: string}>
      */
     public static function selectDataProvider(): array
     {
@@ -45,7 +45,7 @@ class SimplePdoTest extends PdoTestCase
     }
 
     /**
-     * @return array<string, array{0: string, 1: array<string,mixed>}>
+     * @return array<string,array{0: string, 1: array<string,mixed>}>
      */
     public static function insertDataProvider(): array
     {

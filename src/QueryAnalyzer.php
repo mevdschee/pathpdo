@@ -4,11 +4,11 @@ namespace Tqdev\PdoJson;
 
 class QueryAnalyzer
 {
-    /** @var array<string, string> */
+    /** @var array<string,string> */
     public array $tables = []; // alias => table name
     /** @var array<int, array<string,mixed>> */
     public array $joins = []; // list of join info arrays
-    /** @var array<string, string> */
+    /** @var array<string,string> */
     public array $pathHints = []; // alias => path override
 
     /**
@@ -28,7 +28,7 @@ class QueryAnalyzer
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string,string>
      */
     private function extractPathHints(string $sql): array
     {
@@ -171,7 +171,7 @@ class QueryAnalyzer
     }
 
     /**
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string,string>>
      */
     private function parseJoinCondition(string $condition): array
     {

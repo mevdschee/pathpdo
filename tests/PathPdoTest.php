@@ -21,7 +21,7 @@ class PathPdoTest extends PdoTestCase
     }
 
     /**
-     * @return array<string, array{0: string, 1: array<int|string,mixed>, 2: string}>
+     * @return array<string,array{0: string, 1: array<int|string,mixed>, 2: string}>
      */
     public static function pathQueryDataProvider(): array
     {
