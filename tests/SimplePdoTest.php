@@ -10,16 +10,19 @@ class SimplePdoTest extends PdoTestCase
     static $class = '\Tqdev\PdoJson\SimplePdo';
 
     /**
+     * @param array<int, string> $b
+     * @param array<int|string,mixed> $c
      * @dataProvider selectDataProvider
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('selectDataProvider')]
     public function testSelect(string $a, array $b, array $c, string $expected): void
     {
+        $this->assertNotNull($this->db);
         $this->assertEqualsCanonicalizing(json_decode($expected, true), $this->db->select($a, $b, $c));
     }
 
     /**
-     * @return array<string, array{0: string, 1: array<int,string>, 2: array<int|string, mixed>, 3: string}>
+     * @return array<string, array{0: string, 1: array<int,string>, 2: array<int|string,mixed>, 3: string}>
      */
     public static function selectDataProvider(): array
     {
@@ -31,16 +34,18 @@ class SimplePdoTest extends PdoTestCase
     }
 
     /**
+     * @param array<string,mixed> $b
      * @dataProvider insertDataProvider
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('insertDataProvider')]
     public function testInsert(string $a, array $b): void
     {
+        $this->assertNotNull($this->db);
         $this->assertIsInt($this->db->insert($a, $b));
     }
 
     /**
-     * @return array<string, array{0: string, 1: array<string, mixed>}>
+     * @return array<string, array{0: string, 1: array<string,mixed>}>
      */
     public static function insertDataProvider(): array
     {

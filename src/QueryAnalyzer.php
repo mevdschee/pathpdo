@@ -6,7 +6,7 @@ class QueryAnalyzer
 {
     /** @var array<string, string> */
     public array $tables = []; // alias => table name
-    /** @var array<int, array<string, mixed>> */
+    /** @var array<int, array<string,mixed>> */
     public array $joins = []; // list of join info arrays
     /** @var array<string, string> */
     public array $pathHints = []; // alias => path override

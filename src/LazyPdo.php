@@ -157,7 +157,7 @@ class LazyPdo extends \PDO
     /**
      * Fetch extended error information.
      * 
-     * @return array<int|string, mixed> Array containing error information
+     * @return array<int|string,mixed> Array containing error information
      */
     public function errorInfo(): array
     {

@@ -10,16 +10,18 @@ class PathPdoTest extends PdoTestCase
     static $class = '\Tqdev\PdoJson\PathPdo';
 
     /**
+     * @param array<int|string,mixed> $b
      * @dataProvider pathQueryDataProvider
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('pathQueryDataProvider')]
     public function testPathQuery(string $a, array $b, string $expected): void
     {
+        $this->assertNotNull($this->db);
         $this->assertSame($expected, json_encode($this->db->pathQuery($a, $b)));
     }
 
     /**
-     * @return array<string, array{0: string, 1: array<int|string, mixed>, 2: string}>
+     * @return array<string, array{0: string, 1: array<int|string,mixed>, 2: string}>
      */
     public static function pathQueryDataProvider(): array
     {
@@ -131,6 +133,7 @@ class PathPdoTest extends PdoTestCase
      */
     public function testPathQueryWithPathsParameter(): void
     {
+        $this->assertNotNull($this->db);
         // Single object result with paths parameter
         $result = $this->db->pathQuery(
             'SELECT COUNT(*) as posts FROM posts p',
@@ -142,6 +145,7 @@ class PathPdoTest extends PdoTestCase
 
     public function testPathQueryWithPathsParameterNestedArrays(): void
     {
+        $this->assertNotNull($this->db);
         // Posts with comments using paths parameter
         $result = $this->db->pathQuery(
             'SELECT p.id, c.id, c.message 
@@ -169,6 +173,7 @@ class PathPdoTest extends PdoTestCase
 
     public function testPathQueryWithPathsParameterOverridesComments(): void
     {
+        $this->assertNotNull($this->db);
         // Paths parameter should override SQL comment hints
         $result = $this->db->pathQuery(
             'SELECT p.id, c.id 
@@ -196,6 +201,7 @@ class PathPdoTest extends PdoTestCase
 
     public function testPathQueryWithPathsParameterMultipleLevels(): void
     {
+        $this->assertNotNull($this->db);
         // Test deeply nested paths
         $result = $this->db->pathQuery(
             'SELECT p.id, c.id, c.message 
@@ -210,6 +216,7 @@ class PathPdoTest extends PdoTestCase
             ]
         );
 
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('data', $result);
         $this->assertIsArray($result['data']);
         $this->assertArrayHasKey('id', $result['data']);
@@ -222,6 +229,7 @@ class PathPdoTest extends PdoTestCase
 
     public function testPathQueryWithPathsParameterArrayRoot(): void
     {
+        $this->assertNotNull($this->db);
         // Test array at root level
         $result = $this->db->pathQuery(
             'SELECT p.id, p.content FROM posts p WHERE p.id <= :id ORDER BY p.id',
@@ -241,6 +249,7 @@ class PathPdoTest extends PdoTestCase
 
     public function testPathQueryWithEmptyPathsParameter(): void
     {
+        $this->assertNotNull($this->db);
         // Empty paths parameter should work like normal query
         $result = $this->db->pathQuery(
             'SELECT id, content FROM posts WHERE id = :id',

@@ -5,7 +5,7 @@ namespace Tqdev\PdoJson;
 class SmartPdo extends LazyPdo
 {
     protected string $driver;
-    /** @var array<int, mixed> */
+    /** @var array<int,mixed> */
     protected array $options;
     /** @var array<int,string> */
     protected array $commands;
@@ -16,7 +16,7 @@ class SmartPdo extends LazyPdo
      * @param string $dsn The Data Source Name
      * @param string|null $username The username for the database connection
      * @param string|null $password The password for the database connection
-     * @param array<int, mixed> $options Driver-specific connection options
+     * @param array<int,mixed> $options Driver-specific connection options
      * @throws \Exception If the driver is not supported
      */
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = array())
@@ -81,7 +81,7 @@ class SmartPdo extends LazyPdo
      * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
      * @param string $address The database server address
      * @param string $port The database server port (uses default if empty)
-     * @param array<int, mixed> $options Additional PDO options
+     * @param array<int,mixed> $options Additional PDO options
      * @return SmartPdo A new SmartPdo instance
      */
     public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array()): SmartPdo
@@ -94,10 +94,10 @@ class SmartPdo extends LazyPdo
      * Execute a SQL query with optional parameters and return handling.
      * 
      * @param string $statement The SQL statement to execute
-     * @param array<int|string, mixed> $params Parameters for prepared statement
+     * @param array<int|string,mixed> $params Parameters for prepared statement
      * @param bool $returnNumAffected Return number of rows affected instead of results
      * @param bool $returnLastInsertId Return the last insert ID instead of results
-     * @return array<int|string, mixed>|int Array of results, row count, or last insert ID
+     * @return array<int|string,mixed>|int Array of results, row count, or last insert ID
      */
     public function smartQuery(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false): array|int
     {
@@ -144,8 +144,8 @@ class SmartPdo extends LazyPdo
     }
 
     /**
-     * @param array<int, mixed> $options
-     * @return array<int, mixed>
+     * @param array<int,mixed> $options
+     * @return array<int,mixed>
      */
     protected function getOptions(array $options): array
     {

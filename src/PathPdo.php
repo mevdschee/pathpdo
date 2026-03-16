@@ -14,7 +14,7 @@ class PathPdo extends SimplePdo
      * @param string $dsn The Data Source Name
      * @param string|null $username The username for the database connection
      * @param string|null $password The password for the database connection
-     * @param array<int, mixed> $options Driver-specific connection options
+     * @param array<int,mixed> $options Driver-specific connection options
      */
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = [])
     {
@@ -33,7 +33,7 @@ class PathPdo extends SimplePdo
      * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
      * @param string $address The database server address
      * @param string $port The database server port (uses default if empty)
-     * @param array<int, mixed> $options Additional PDO options
+     * @param array<int,mixed> $options Additional PDO options
      * @return PathPdo A new PathPdo instance
      * @throws \Exception If the driver is not supported
      */
@@ -65,10 +65,10 @@ class PathPdo extends SimplePdo
      * foreign key relationships, returning nested arrays/objects instead of flat rows.
      * 
      * @param string $query The SQL query to execute
-     * @param array<int|string, mixed> $params Parameters for prepared statement
+     * @param array<int|string,mixed> $params Parameters for prepared statement
      * @param array<string, string> $paths Optional path mappings for table aliases (overrides SQL comment hints)
      *                     Format: ['alias' => '$.path', 'other' => '$.parent.child[]']
-     * @return array<int|string, mixed> Hierarchical result structure based on inferred paths
+     * @return array<int|string,mixed> Hierarchical result structure based on inferred paths
      * @throws \RuntimeException If query execution fails
      */
     public function pathQuery(string $query, array $params = [], array $paths = []): array
@@ -149,7 +149,7 @@ class PathPdo extends SimplePdo
 
     /**
      * @param array<int,string> $paths
-     * @return array<int, array<int|string, mixed>>
+     * @return array<int, array<int|string,mixed>>
      */
     private function getAllRecords(\PDOStatement $statement, array $paths): array
     {
@@ -173,8 +173,8 @@ class PathPdo extends SimplePdo
     }
 
     /**
-     * @param array<int|string, mixed> $record
-     * @return array<string, mixed>
+     * @param array<int|string,mixed> $record
+     * @return array<string,mixed>
      */
     private function buildObject(array $record): array
     {
@@ -199,8 +199,8 @@ class PathPdo extends SimplePdo
     }
 
     /**
-     * @param array<int, array<int|string, mixed>> $records
-     * @return array<int, array<string, mixed>>
+     * @param array<int, array<int|string,mixed>> $records
+     * @return array<int, array<string,mixed>>
      */
     private function buildFlatArray(array $records): array
     {
@@ -216,8 +216,8 @@ class PathPdo extends SimplePdo
     }
 
     /**
-     * @param array<int, array<int|string, mixed>> $records
-     * @return array<int, array<string, array<string, mixed>>>
+     * @param array<int, array<int|string,mixed>> $records
+     * @return array<int, array<string, array<string,mixed>>>
      */
     private function groupBySeparator(array $records, string $separator): array
     {
@@ -242,8 +242,8 @@ class PathPdo extends SimplePdo
     }
 
     /**
-     * @param array<int, array<string, array<string, mixed>>> $records
-     * @return array<int, array<int|string, mixed>>
+     * @param array<int, array<string, array<string,mixed>>> $records
+     * @return array<int, array<int|string,mixed>>
      */
     private function addHashes(array $records): array
     {
@@ -273,12 +273,12 @@ class PathPdo extends SimplePdo
     }
 
     /**
-     * @param array<int, array<int|string, mixed>> $records
+     * @param array<int, array<int|string,mixed>> $records
      * @return array<mixed>
      */
     private function combineIntoTree(array $records, string $separator): array
     {
-        /** @var array<string, mixed> $results */
+        /** @var array<string,mixed> $results */
         $results = [];
         foreach ($records as $record) {
             foreach ($record as $name => $value) {
@@ -306,7 +306,7 @@ class PathPdo extends SimplePdo
 
     /**
      * @param array<mixed> $tree
-     * @return array<int|string, mixed>
+     * @return array<int|string,mixed>
      */
     private function removeHashes(array $tree, string $path): array
     {

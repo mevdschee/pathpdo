@@ -17,15 +17,19 @@ class PdoTestCase extends TestCase
     public static function setUpBeforeClass(): void
     {
         $config = parse_ini_file("test_config.ini", true);
-        if ($config === false) {
+        if ($config === false || !isset($config['phpunit'])) {
             throw new \RuntimeException("Failed to parse config file");
         }
-        $username = $config['phpunit']['username'];
-        $password = $config['phpunit']['password'];
-        $database = $config['phpunit']['database'];
-        $driver = $config['phpunit']['driver'];
-        $address = $config['phpunit']['address'];
-        $port = $config['phpunit']['port'];
+        $phpunitConfig = $config['phpunit'];
+        if (!is_array($phpunitConfig)) {
+            throw new \RuntimeException("Invalid config format");
+        }
+        $username = (string)($phpunitConfig['username'] ?? '');
+        $password = (string)($phpunitConfig['password'] ?? '');
+        $database = (string)($phpunitConfig['database'] ?? '');
+        $driver = (string)($phpunitConfig['driver'] ?? 'mysql');
+        $address = (string)($phpunitConfig['address'] ?? 'localhost');
+        $port = (string)($phpunitConfig['port'] ?? '');
         $class = static::$class;
         static::$pdo = $class::create($username, $password, $database, $driver, $address, $port);
         static::$pdo->beginTransaction();
@@ -43,6 +47,8 @@ class PdoTestCase extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        static::$pdo->rollback();
+        if (static::$pdo !== null) {
+            static::$pdo->rollback();
+        }
     }
 }

@@ -115,7 +115,7 @@ class Schema
     /**
      * Load metadata from the configured file.
      * 
-     * @return array<string, mixed>
+     * @return array<string,mixed>
      * @throws \RuntimeException
      */
     private static function loadMetadataFromFile(): array
@@ -162,7 +162,7 @@ class Schema
      * Save metadata to a file.
      * 
      * @param string $filename Path to save metadata to
-     * @param array<string, mixed> $metadata Metadata array to save
+     * @param array<string,mixed> $metadata Metadata array to save
      * @param string $format Format: 'json' or 'php' (default: 'json')
      * @throws \RuntimeException
      */

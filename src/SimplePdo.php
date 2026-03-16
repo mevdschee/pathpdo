@@ -13,7 +13,7 @@ class SimplePdo extends SmartPdo
      * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
      * @param string $address The database server address
      * @param string $port The database server port (uses default if empty)
-     * @param array<int, mixed> $options Additional PDO options
+     * @param array<int,mixed> $options Additional PDO options
      * @return SimplePdo A new SimplePdo instance
      */
     public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array()): SimplePdo
@@ -26,7 +26,7 @@ class SimplePdo extends SmartPdo
      * Insert a record into a table.
      * 
      * @param string $table The table name
-     * @param array<string, mixed> $record Associative array of column => value pairs
+     * @param array<string,mixed> $record Associative array of column => value pairs
      * @return int The last insert ID or 0 on failure
      */
     public function insert(string $table, array $record): int
@@ -47,8 +47,8 @@ class SimplePdo extends SmartPdo
      * 
      * @param string $table The table name
      * @param array<int,string> $fields Array of field names (empty for all fields)
-     * @param array<int|string, mixed> $conditions Where conditions (key => value or [field, operator, value])
-     * @return array<int|string, mixed> Array of matching records
+     * @param array<int|string,mixed> $conditions Where conditions (key => value or [field, operator, value])
+     * @return array<int|string,mixed> Array of matching records
      */
     public function select(string $table, array $fields = [], array $conditions = []): array
     {
@@ -67,8 +67,8 @@ class SimplePdo extends SmartPdo
      * Update records in a table.
      * 
      * @param string $table The table name
-     * @param array<string, mixed> $fields Associative array of column => value pairs to update
-     * @param array<int|string, mixed> $conditions Where conditions (key => value or [field, operator, value])
+     * @param array<string,mixed> $fields Associative array of column => value pairs to update
+     * @param array<int|string,mixed> $conditions Where conditions (key => value or [field, operator, value])
      * @return int Number of rows affected
      */
     public function update(string $table, array $fields, array $conditions): int
@@ -88,7 +88,7 @@ class SimplePdo extends SmartPdo
      * Delete records from a table.
      * 
      * @param string $table The table name
-     * @param array<int|string, mixed> $conditions Where conditions (key => value or [field, operator, value])
+     * @param array<int|string,mixed> $conditions Where conditions (key => value or [field, operator, value])
      * @return int Number of rows deleted
      */
     public function delete(string $table, array $conditions): int
@@ -123,7 +123,7 @@ class SimplePdo extends SmartPdo
     }
 
     /**
-     * @param array<string, mixed> $record
+     * @param array<string,mixed> $record
      */
     protected function buildSqlInsertFields(array $record): string
     {
@@ -135,8 +135,8 @@ class SimplePdo extends SmartPdo
     }
 
     /**
-     * @param array<int, mixed> $params
-     * @param array<string, mixed> $record
+     * @param array<int,mixed> $params
+     * @param array<string,mixed> $record
      */
     protected function buildSqlInsertValues(array &$params, array $record): string
     {
@@ -170,8 +170,8 @@ class SimplePdo extends SmartPdo
     }
 
     /**
-     * @param array<int, mixed> $params
-     * @param array<string, mixed> $fields
+     * @param array<int,mixed> $params
+     * @param array<string,mixed> $fields
      */
     protected function buildSqlSet(array &$params, array $fields): string
     {
@@ -197,8 +197,8 @@ class SimplePdo extends SmartPdo
     }
 
     /**
-     * @param array<int, mixed> $params
-     * @param array<int|string, mixed> $conditions
+     * @param array<int,mixed> $params
+     * @param array<int|string,mixed> $conditions
      */
     protected function buildSqlWhere(array &$params, array $conditions): string
     {

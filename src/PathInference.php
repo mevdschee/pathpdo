@@ -102,7 +102,7 @@ class PathInference
     }
 
     /**
-     * @param array<string, mixed> $join
+     * @param array<string,mixed> $join
      * @param array<int, array<string, string>> $allFks
      */
     private function isOneToManyJoin(array $join, array $allFks): bool
