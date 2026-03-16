@@ -4,6 +4,7 @@ namespace Tqdev\PdoJson\Tests;
 
 class SimplePdoTest extends PdoTestCase
 {
+    static $pdo;
     static $class = '\Tqdev\PdoJson\SimplePdo';
 
     /**

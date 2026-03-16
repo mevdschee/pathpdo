@@ -20,7 +20,8 @@ class PdoTestCase extends TestCase
         $driver = $config['phpunit']['driver'];
         $address = $config['phpunit']['address'];
         $port = $config['phpunit']['port'];
-        static::$pdo = static::$class::create($username, $password, $database, $driver, $address, $port);
+        $class = static::$class;
+        static::$pdo = $class::create($username, $password, $database, $driver, $address, $port);
         static::$pdo->beginTransaction();
     }
 

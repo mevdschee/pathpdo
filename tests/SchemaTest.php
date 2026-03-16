@@ -11,7 +11,6 @@ class SchemaTest extends PdoTestCase
         $schema = new Schema();
         $fks = $schema->getForeignKeys(static::$pdo);
 
-        $this->assertIsArray($fks);
         $this->assertNotEmpty($fks);
 
         // Should have foreign keys from test database
@@ -85,7 +84,7 @@ class SchemaTest extends PdoTestCase
             // Load and verify structure
             Schema::setMetadataFile($tempFile);
             $fks = $schema->getForeignKeys(static::$pdo);
-            $this->assertIsArray($fks);
+            $this->assertNotEmpty($fks);
         } finally {
             // Cleanup
             Schema::setMetadataFile(null);

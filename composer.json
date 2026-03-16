@@ -21,7 +21,8 @@
     "ext-pdo": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "phpstan/phpstan": "^2.1"
   },
   "autoload": {
     "psr-4": {

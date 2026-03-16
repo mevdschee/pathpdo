@@ -4,6 +4,31 @@ namespace Tqdev\PdoJson;
 
 class SimplePdo extends SmartPdo
 {
+    /**
+     * Create a SimplePdo connection using simplified parameters.
+     * 
+     * @param string $username The database username
+     * @param string $password The database password
+     * @param string $database The database name
+     * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
+     * @param string $address The database server address
+     * @param string $port The database server port (uses default if empty)
+     * @param array $options Additional PDO options
+     * @return SimplePdo A new SimplePdo instance
+     */
+    public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array()): SimplePdo
+    {
+        $dsn = parent::buildDsn($driver, $address, $port, $database);
+        return new SimplePdo($dsn, $username, $password, $options);
+    }
+
+    /**
+     * Insert a record into a table.
+     * 
+     * @param string $table The table name
+     * @param array $record Associative array of column => value pairs
+     * @return int The last insert ID or 0 on failure
+     */
     public function insert(string $table, array $record): int
     {
         if (empty($table) || empty($record)) {
@@ -16,6 +41,14 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, false, true);
     }
 
+    /**
+     * Select records from a table.
+     * 
+     * @param string $table The table name
+     * @param array $fields Array of field names (empty for all fields)
+     * @param array $conditions Where conditions (key => value or [field, operator, value])
+     * @return array Array of matching records
+     */
     public function select(string $table, array $fields = [], array $conditions = []): array
     {
         if (empty($table)) {
@@ -28,6 +61,14 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, false, false);
     }
 
+    /**
+     * Update records in a table.
+     * 
+     * @param string $table The table name
+     * @param array $fields Associative array of column => value pairs to update
+     * @param array $conditions Where conditions (key => value or [field, operator, value])
+     * @return int Number of rows affected
+     */
     public function update(string $table, array $fields, array $conditions): int
     {
         if (empty($table) || empty($fields) || empty($conditions)) {
@@ -40,6 +81,13 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, true, false);
     }
 
+    /**
+     * Delete records from a table.
+     * 
+     * @param string $table The table name
+     * @param array $conditions Where conditions (key => value or [field, operator, value])
+     * @return int Number of rows deleted
+     */
     public function delete(string $table, array $conditions): int
     {
         if (empty($table) || empty($conditions)) {
@@ -51,6 +99,12 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, true);
     }
 
+    /**
+     * Quote an identifier (table or column name) for safe use in SQL.
+     * 
+     * @param string $string The identifier to quote
+     * @return string The quoted identifier
+     */
     public function quoteIdentifier(string $string): string
     {
         $str = \preg_replace('/[^\.0-9a-zA-Z_\/]/', '', $string);

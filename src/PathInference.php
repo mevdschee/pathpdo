@@ -6,11 +6,27 @@ class PathInference
 {
     private $schema;
 
+    /**
+     * Constructs a PathInference instance.
+     * 
+     * @param Schema $schema The schema object for foreign key information
+     */
     public function __construct(Schema $schema)
     {
         $this->schema = $schema;
     }
 
+    /**
+     * Infer paths for all columns in a query result.
+     * 
+     * Analyzes the query structure, foreign key relationships, and path hints
+     * to determine the hierarchical path for each column in the result set.
+     * 
+     * @param QueryAnalyzer $analysis The analyzed query information
+     * @param array $columns Array of column names to infer paths for
+     * @param SmartPdo $db Database connection for schema queries
+     * @return array Array of paths corresponding to each column
+     */
     public function inferPaths(QueryAnalyzer $analysis, array $columns, SmartPdo $db): array
     {
         $paths = [];

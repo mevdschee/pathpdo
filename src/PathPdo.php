@@ -8,6 +8,14 @@ class PathPdo extends SimplePdo
     private $queryAnalyzer;
     private $pathInference;
 
+    /**
+     * Constructs a PathPdo instance with path inference capabilities.
+     * 
+     * @param string $dsn The Data Source Name
+     * @param string|null $username The username for the database connection
+     * @param string|null $password The password for the database connection
+     * @param array $options Driver-specific connection options
+     */
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = [])
     {
         parent::__construct($dsn, $username, $password, $options);
@@ -16,7 +24,20 @@ class PathPdo extends SimplePdo
         $this->pathInference = new PathInference($this->schema);
     }
 
-    public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array())
+    /**
+     * Create a PathPdo connection using simplified parameters.
+     * 
+     * @param string $username The database username
+     * @param string $password The database password
+     * @param string $database The database name
+     * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
+     * @param string $address The database server address
+     * @param string $port The database server port (uses default if empty)
+     * @param array $options Additional PDO options
+     * @return PathPdo A new PathPdo instance
+     * @throws \Exception If the driver is not supported
+     */
+    public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array()): PathPdo
     {
         switch ($driver) {
             case 'mysql':
@@ -34,9 +55,21 @@ class PathPdo extends SimplePdo
             default:
                 throw new \Exception("Unsupported driver '$driver'");
         }
-        return new static($dsn, $username, $password, $options);
+        return new PathPdo($dsn, $username, $password, $options);
     }
 
+    /**
+     * Execute a query with automatic path inference for hierarchical results.
+     * 
+     * Automatically infers the structure of the result set based on SQL JOINs and
+     * foreign key relationships, returning nested arrays/objects instead of flat rows.
+     * 
+     * @param string $query The SQL query to execute
+     * @param array $params Parameters for prepared statement
+     * @param array $paths Optional path mappings for table aliases (overrides SQL comment hints)
+     *                     Format: ['alias' => '$.path', 'other' => '$.parent.child[]']
+     * @return array|object Hierarchical result structure based on inferred paths
+     */
     public function pathQuery(string $query, array $params = [], array $paths = [])
     {
         if (empty($params)) {
@@ -198,6 +231,7 @@ class PathPdo extends SimplePdo
 
     private function combineIntoTree(array $records, string $separator): array
     {
+        /** @var array<string, mixed> $results */
         $results = [];
         foreach ($records as $record) {
             foreach ($record as $name => $value) {

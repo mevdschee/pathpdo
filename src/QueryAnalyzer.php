@@ -8,6 +8,11 @@ class QueryAnalyzer
     public $joins = []; // list of join info arrays
     public $pathHints = []; // alias => path override
 
+    /**
+     * Analyze a SQL query to extract tables, joins, and path hints.
+     * 
+     * @param string $sql The SQL query to analyze
+     */
     public function analyze(string $sql): void
     {
         $this->tables = [];
@@ -85,11 +90,11 @@ class QueryAnalyzer
     {
         // Pattern: [LEFT|RIGHT|INNER|OUTER] JOIN table [AS] alias ON condition
         $pattern = '/(LEFT\s+|RIGHT\s+|INNER\s+|OUTER\s+|CROSS\s+)?JOIN\s+([a-zA-Z0-9_`"\'\.]+)(?:\s+(?:AS\s+)?([a-zA-Z0-9_`"\']+))?\s+ON\s+(.+)/si';
-        
+
         if (preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
-            
+
             foreach ($matches as $match) {
-                $joinType = trim(strtoupper($match[1] ?? ''));
+                $joinType = trim(strtoupper($match[1]));
                 if ($joinType === '') {
                     $joinType = 'INNER';
                 }
@@ -100,7 +105,7 @@ class QueryAnalyzer
                     $alias = trim($match[3], '`"\'');
                 }
                 $condition = trim($match[4]);
-                
+
                 $upperCond = strtoupper($condition);
                 $stopWords = ['WHERE ', 'GROUP ', 'ORDER ', 'LIMIT ', 'HAVING ', 'LEFT ', 'RIGHT ', 'CROSS ', 'INNER ', 'OUTER ', 'JOIN '];
                 $minPos = strlen($condition);
@@ -175,6 +180,12 @@ class QueryAnalyzer
         return $columns;
     }
 
+    /**
+     * Parse the SELECT columns from a query.
+     * 
+     * @param string $query The SQL query
+     * @return array Array of column names/aliases from the SELECT clause
+     */
     public function parseSelectColumns(string $query): array
     {
         if (preg_match('/^\s*SELECT\s+(.+?)\s+FROM\s+/is', $query, $matches)) {
@@ -184,9 +195,11 @@ class QueryAnalyzer
             $current = '';
             for ($i = 0; $i < strlen($selectClause); $i++) {
                 $c = $selectClause[$i];
-                if ($c === '(') { $depth++; }
-                elseif ($c === ')') { $depth--; }
-                elseif ($c === ',' && $depth === 0) {
+                if ($c === '(') {
+                    $depth++;
+                } elseif ($c === ')') {
+                    $depth--;
+                } elseif ($c === ',' && $depth === 0) {
                     $cols[] = trim($current);
                     $current = '';
                     continue;
@@ -196,7 +209,7 @@ class QueryAnalyzer
             if (trim($current) !== '') {
                 $cols[] = trim($current);
             }
-            
+
             $result = [];
             foreach ($cols as $col) {
                 if (preg_match('/\s+AS\s+([a-zA-Z0-9_`"\.]+)/i', $col, $m)) {
