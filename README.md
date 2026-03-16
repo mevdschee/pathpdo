@@ -107,3 +107,101 @@ file, or database).
 - **Portability**: Works even without direct access to information_schema
 - **Version Control**: Track schema changes in your repository
 - **Consistency**: Ensures the same schema interpretation across environments
+
+## Using PathQL
+
+### Basic Query
+
+The `pathQuery()` method executes SQL queries and returns results in a
+hierarchical structure based on table relationships:
+
+```php
+$db = PathPdo::create($username, $password, $database);
+
+// Simple query
+$results = $db->pathQuery('SELECT id, name FROM users');
+// Returns: [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
+
+// With parameters
+$results = $db->pathQuery('SELECT id, name FROM users WHERE id = ?', [1]);
+```
+
+### Specifying Paths with Array Parameter
+
+Instead of using SQL comments, you can specify paths for tables or aliases using
+the third parameter:
+
+```php
+// Map table aliases to their paths
+$results = $db->pathQuery(
+    'SELECT p.id, c.id, c.content 
+     FROM posts p 
+     LEFT JOIN comments c ON c.post_id = p.id 
+     WHERE p.id = 1',
+    [],  // No query parameters
+    [    // Path mapping
+        'p' => '$',
+        'c' => '$.comments[]'
+    ]
+);
+// Returns: {"id": 1, "comments": [{"id": 1, "content": "..."}, {"id": 2, "content": "..."}]}
+```
+
+### Specifying Paths with SQL Comments
+
+Alternatively, you can use SQL comments to specify paths (useful when you can't
+modify the pathQuery call):
+
+```php
+$results = $db->pathQuery('
+    SELECT p.id, c.id, c.content 
+    FROM posts p -- PATH p $
+    LEFT JOIN comments c ON c.post_id = p.id -- PATH c $.comments[]
+    WHERE p.id = 1
+');
+```
+
+### Path Syntax
+
+- `$` - Root object
+- `$.property` - Nested property
+- `$[]` - Array of objects
+- `$.property[]` - Nested array
+- `$.parent.child[]` - Deeply nested array
+
+### Examples
+
+```php
+// Single object result
+$stats = $db->pathQuery(
+    'SELECT COUNT(*) as posts FROM posts',
+    [],
+    ['posts' => '$.statistics']
+);
+// Returns: {"statistics": {"posts": 12}}
+
+// Nested arrays
+$results = $db->pathQuery(
+    'SELECT u.name, p.title, c.content 
+     FROM users u
+     LEFT JOIN posts p ON p.user_id = u.id
+     LEFT JOIN comments c ON c.post_id = p.id
+     WHERE u.id = 1',
+    [],
+    [
+        'u' => '$',
+        'p' => '$.posts[]',
+        'c' => '$.posts[].comments[]'
+    ]
+);
+// Returns: {
+//   "name": "John",
+//   "posts": [
+//     {"title": "First Post", "comments": [{"content": "Nice!"}, ...]},
+//     ...
+//   ]
+// }
+```
+
+**Note:** When both SQL comment paths and the `$paths` parameter are provided,
+the `$paths` parameter takes precedence.

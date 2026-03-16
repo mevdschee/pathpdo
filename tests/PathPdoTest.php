@@ -119,4 +119,123 @@ class PathPdoTest extends PdoTestCase
             ],
         ];
     }
+
+    /**
+     * Test pathQuery with explicit paths parameter
+     */
+    public function testPathQueryWithPathsParameter()
+    {
+        // Single object result with paths parameter
+        $result = $this->db->pathQuery(
+            'SELECT COUNT(*) as posts FROM posts p',
+            [],
+            ['p' => '$.statistics']
+        );
+        $this->assertEquals(['statistics' => ['posts' => 12]], $result);
+    }
+
+    public function testPathQueryWithPathsParameterNestedArrays()
+    {
+        // Posts with comments using paths parameter
+        $result = $this->db->pathQuery(
+            'SELECT p.id, c.id, c.message 
+             FROM posts p 
+             LEFT JOIN comments c ON c.post_id = p.id 
+             WHERE p.id = 1 
+             ORDER BY c.id',
+            [],
+            [
+                'p' => '$',
+                'c' => '$.comments[]'
+            ]
+        );
+
+        $expected = [
+            'id' => 1,
+            'comments' => [
+                ['id' => 1, 'message' => 'great!'],
+                ['id' => 2, 'message' => 'nice!']
+            ]
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testPathQueryWithPathsParameterOverridesComments()
+    {
+        // Paths parameter should override SQL comment hints
+        $result = $this->db->pathQuery(
+            'SELECT p.id, c.id 
+             FROM posts p -- PATH p $.wrong
+             LEFT JOIN comments c ON c.post_id = p.id -- PATH c $.wrong[]
+             WHERE p.id = 1 
+             ORDER BY c.id',
+            [],
+            [
+                'p' => '$',
+                'c' => '$.comments[]'
+            ]
+        );
+
+        $expected = [
+            'id' => 1,
+            'comments' => [
+                ['id' => 1],
+                ['id' => 2]
+            ]
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testPathQueryWithPathsParameterMultipleLevels()
+    {
+        // Test deeply nested paths
+        $result = $this->db->pathQuery(
+            'SELECT p.id, c.id, c.message 
+             FROM posts p 
+             LEFT JOIN comments c ON c.post_id = p.id 
+             WHERE p.id = 2 
+             ORDER BY c.id',
+            [],
+            [
+                'p' => '$.data',
+                'c' => '$.data.comments[]'
+            ]
+        );
+
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('id', $result['data']);
+        $this->assertEquals(2, $result['data']['id']);
+        $this->assertArrayHasKey('comments', $result['data']);
+        $this->assertCount(4, $result['data']['comments']);
+    }
+
+    public function testPathQueryWithPathsParameterArrayRoot()
+    {
+        // Test array at root level
+        $result = $this->db->pathQuery(
+            'SELECT p.id, p.content FROM posts p WHERE p.id <= 2 ORDER BY p.id',
+            [],
+            ['p' => '$[]']
+        );
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+        $this->assertEquals(1, $result[0]['id']);
+        $this->assertEquals(2, $result[1]['id']);
+        $this->assertEquals('blog started', $result[0]['content']);
+    }
+
+    public function testPathQueryWithEmptyPathsParameter()
+    {
+        // Empty paths parameter should work like normal query
+        $result = $this->db->pathQuery(
+            'SELECT id, content FROM posts WHERE id = 1',
+            [],
+            []
+        );
+
+        $this->assertEquals([['id' => 1, 'content' => 'blog started']], $result);
+    }
 }

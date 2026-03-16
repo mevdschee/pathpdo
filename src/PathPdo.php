@@ -37,7 +37,7 @@ class PathPdo extends SimplePdo
         return new static($dsn, $username, $password, $options);
     }
 
-    public function pathQuery(string $query, array $params = [])
+    public function pathQuery(string $query, array $params = [], array $paths = [])
     {
         if (empty($params)) {
             $statement = $this->query($query);
@@ -49,6 +49,12 @@ class PathPdo extends SimplePdo
 
         // Analyze query and infer paths
         $this->queryAnalyzer->analyze($query);
+
+        // Merge provided paths into path hints (overrides SQL comment hints)
+        if (!empty($paths)) {
+            $this->queryAnalyzer->pathHints = array_merge($this->queryAnalyzer->pathHints, $paths);
+        }
+
         $inferColumns = $this->queryAnalyzer->parseSelectColumns($query);
         if (empty($inferColumns) || count($inferColumns) !== count($pdoColumns)) {
             $inferColumns = $pdoColumns; // Fallback entirely to PDO meta if parse fails or count mismatch
