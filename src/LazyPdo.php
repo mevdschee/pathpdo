@@ -27,7 +27,7 @@ class LazyPdo extends \PDO
         $this->password = $password;
         $this->options = $options;
         $this->commands = array();
-        // explicitly NOT calling super::__construct
+        // explicitly NOT calling parent::__construct
     }
 
     /**
@@ -35,7 +35,7 @@ class LazyPdo extends \PDO
      * 
      * @param string $command SQL command to execute on initialization
      */
-    public function addInitCommand(string $command) /*: void*/
+    public function addInitCommand(string $command): void
     {
         $this->commands[] = $command;
     }
