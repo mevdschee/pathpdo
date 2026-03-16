@@ -44,6 +44,42 @@ $schema->exportMetadata($db, 'pathpdo.json');
 $schema->exportMetadata($db, 'pathpdo.php', 'php');
 ```
 
+### Custom Metadata Cache
+
+For advanced use cases, you can implement your own metadata caching (e.g.,
+Redis, Memcached, database) using the `setMetaData()` and `getMetaData()`
+methods:
+
+```php
+use Tqdev\PdoJson\Schema;
+
+// Example: Caching metadata in Redis
+$redis = new Redis();
+$redis->connect('127.0.0.1', 6379);
+
+// Check if metadata is cached
+if ($redis->exists('pathpdo:metadata')) {
+    // Load from cache
+    $json = $redis->get('pathpdo:metadata');
+    Schema::setMetaData($json);
+} else {
+    // Generate from database
+    $db = PathPdo::create($username, $password, $database);
+    $schema = new Schema();
+    $json = $schema->getMetaData($db);
+    
+    // Store in cache
+    $redis->set('pathpdo:metadata', $json, 3600); // Cache for 1 hour
+    Schema::setMetaData($json);
+}
+
+// Now PathPDO will use the cached metadata
+```
+
+The `setMetaData()` method accepts a JSON string in the same format as metadata
+files, while `getMetaData()` returns the current metadata as JSON (from cache,
+file, or database).
+
 ### Metadata File Format (JSON)
 
 ```json

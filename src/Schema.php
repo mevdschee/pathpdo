@@ -26,6 +26,60 @@ class Schema
     }
 
     /**
+     * Set metadata directly from a JSON string.
+     * This allows custom metadata caching implementations without using files.
+     * 
+     * @param string $json JSON-encoded metadata (same format as metadata files)
+     * @throws \RuntimeException if JSON is invalid
+     */
+    public static function setMetaData(string $json): void
+    {
+        $data = json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException("Invalid JSON metadata: " . json_last_error_msg());
+        }
+        if (!is_array($data)) {
+            throw new \RuntimeException("Metadata must be a JSON object/array");
+        }
+
+        self::$fileMetadata = $data;
+        self::$metadataFile = null; // Clear file path when using direct metadata
+    }
+
+    /**
+     * Get metadata as a JSON string.
+     * Returns current metadata from cache, file, or database.
+     * 
+     * @param SmartPdo|null $db Database connection (required if no metadata is cached)
+     * @return string JSON-encoded metadata
+     * @throws \RuntimeException if metadata cannot be retrieved
+     */
+    public function getMetaData(?SmartPdo $db = null): string
+    {
+        // If we have cached metadata, return it
+        if (self::$fileMetadata !== null) {
+            return json_encode(self::$fileMetadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }
+
+        // If a metadata file is configured, load from it
+        if (self::$metadataFile !== null) {
+            $metadata = self::loadMetadataFromFile();
+            return json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }
+
+        // Otherwise, query the database
+        if ($db === null) {
+            throw new \RuntimeException("Database connection required to retrieve metadata");
+        }
+
+        $metadata = [
+            'foreign_keys' => $this->getForeignKeysFromDatabase($db),
+        ];
+
+        return json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
      * Get the current metadata file path.
      * 
      * @return string|null
@@ -135,6 +189,11 @@ class Schema
      */
     public function getForeignKeys(SmartPdo $db): array
     {
+        // Check if we have directly set metadata (via setMetaData)
+        if (self::$fileMetadata !== null) {
+            return self::$fileMetadata['foreign_keys'] ?? [];
+        }
+
         // Check if we should use file-based metadata
         if (self::$metadataFile !== null) {
             return $this->getForeignKeysFromFile();
