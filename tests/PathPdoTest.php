@@ -50,46 +50,7 @@ class PathPdoTest extends PdoTestCase
                 '[{"name":"announcement","post_count":11},{"name":"article","post_count":1}]',
             ],
 
-            // --- Single-object fast path via PATH hints ---
-            'count posts as object with path hint' => [
-                'select count(*) as posts from posts -- PATH $ $.posts',
-                [],
-                '{"posts":12}',
-            ],
-            'count posts with added root set in path hint' => [
-                'select count(*) as posts from posts -- PATH $ $.statistics.posts',
-                [],
-                '{"statistics":{"posts":12}}',
-            ],
-            'count posts and comments as object with path hint' => [
-                'select (select count(*) from posts) as posts, (select count(*) from comments) as comments -- PATH $ $.stats',
-                [],
-                '{"stats":{"posts":12,"comments":6}}',
-            ],
-
-            // --- PATH comment hint (new feature) ---
-            'count as object with PATH hint' => [
-                'select count(*) as posts from posts p -- PATH p $',
-                [],
-                '{"posts":12}',
-            ],
-            'nested statistics with PATH hint' => [
-                'select count(*) as posts from posts p -- PATH p $.statistics',
-                [],
-                '{"statistics":{"posts":12}}',
-            ],
-            'count posts and comments with PATH hint' => [
-                'select (select count(*) from posts) as posts, (select count(*) from comments) as comments -- PATH $ $.statistics',
-                [],
-                '{"statistics":{"posts":12,"comments":6}}',
-            ],
-
             // --- Automatic Path Inference (from JOINs and FKs) ---
-            'two tables flat join with PATH hint flat array' => [
-                'select p.id as "p.id", c.id as "c.id" from posts p left join comments c on c.post_id = p.id where p.id=1 order by c.id -- PATH p $[].p -- PATH c $[].c',
-                [],
-                '[{"p":{"id":1},"c":{"id":1}},{"p":{"id":1},"c":{"id":2}}]',
-            ],
             'posts with comments properly nested' => [
                 'select p.id, c.id from posts p left join comments c on c.post_id = p.id where p.id<=2 order by p.id, c.id',
                 [],
@@ -100,13 +61,8 @@ class PathPdoTest extends PdoTestCase
                 [],
                 '[{"id":1,"p":{"id":1}},{"id":2,"p":{"id":1}},{"id":3,"p":{"id":2}},{"id":4,"p":{"id":2}},{"id":5,"p":{"id":2}},{"id":6,"p":{"id":2}}]',
             ],
-            'count posts with array path hint' => [
-                'select count(*) as posts from posts p -- PATH p $[]',
-                [],
-                '[{"posts":12}]',
-            ],
 
-            // --- Automatic Path Inference without PATH hints ---
+            // --- Automatic Path Inference ---
             'simple query with alias no joins' => [
                 'select p.id, p.content from posts p where p.id=1',
                 [],
@@ -173,14 +129,14 @@ class PathPdoTest extends PdoTestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testPathQueryWithPathsParameterOverridesComments(): void
+    public function testPathQueryWithPathsParameterCustomPaths(): void
     {
         $this->assertNotNull($this->db);
-        // Paths parameter should override SQL comment hints
+        // Test paths parameter with custom structure
         $result = $this->db->pathQuery(
             'SELECT p.id, c.id 
-             FROM posts p -- PATH p $.wrong
-             LEFT JOIN comments c ON c.post_id = p.id -- PATH c $.wrong[]
+             FROM posts p
+             LEFT JOIN comments c ON c.post_id = p.id
              WHERE p.id = ?
              ORDER BY c.id',
             [1],

@@ -129,8 +129,7 @@ $results = $db->pathQuery('SELECT * FROM users WHERE id = ?', [1]);
 
 ### Specifying Paths with Array Parameter
 
-Instead of using SQL comments, you can specify paths for tables or aliases using
-the third parameter:
+You can specify paths for tables or aliases using the third parameter:
 
 ```php
 // Map table aliases to their paths

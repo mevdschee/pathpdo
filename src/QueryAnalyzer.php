@@ -9,10 +9,10 @@ class QueryAnalyzer
     /** @var array<int, array<string,mixed>> */
     public array $joins = []; // list of join info arrays
     /** @var array<string,string> */
-    public array $pathHints = []; // alias => path override
+    public array $pathHints = []; // alias => path hint
 
     /**
-     * Analyze a SQL query to extract tables, joins, and path hints.
+     * Analyze a SQL query to extract tables and joins.
      * 
      * @param string $sql The SQL query to analyze
      */
@@ -20,29 +20,11 @@ class QueryAnalyzer
     {
         $this->tables = [];
         $this->joins = [];
-        $this->pathHints = $this->extractPathHints($sql);
+        $this->pathHints = [];
 
         $sqlNoComments = $this->removeComments($sql);
         $this->extractFromClause($sqlNoComments);
         $this->extractJoins($sqlNoComments);
-    }
-
-    /**
-     * @return array<string,string>
-     */
-    private function extractPathHints(string $sql): array
-    {
-        $hints = [];
-        // Matches: -- PATH alias $.path or -- PATH: alias $.path
-        // Allow $ alone or followed by chars
-        if (preg_match_all('/--\s*PATH:?\s+(\$|\w+)\s+(\$[\w\[\]\.\*]*)/', $sql, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $alias = $match[1];
-                $path = $match[2];
-                $hints[$alias] = $path;
-            }
-        }
-        return $hints;
     }
 
     private function removeComments(string $sql): string

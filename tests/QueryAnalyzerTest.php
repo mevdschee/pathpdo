@@ -31,11 +31,10 @@ class QueryAnalyzerTest extends TestCase
     public function testAnalyze(): void
     {
         $analyzer = new QueryAnalyzer();
-        $sql = 'select p.id as pid, c.id as cid from posts p LEFT JOIN comments c ON c.post_id = p.id WHERE p.id <= 2 -- PATH p $[].p -- PATH c $[].c';
+        $sql = 'select p.id as pid, c.id as cid from posts p LEFT JOIN comments c ON c.post_id = p.id WHERE p.id <= 2';
         $analyzer->analyze($sql);
 
         $this->assertEquals(['p' => 'posts', 'c' => 'comments'], $analyzer->tables);
-        $this->assertEquals(['p' => '$[].p', 'c' => '$[].c'], $analyzer->pathHints);
         $this->assertCount(1, $analyzer->joins);
 
         $join = $analyzer->joins[0];

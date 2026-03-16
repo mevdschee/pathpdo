@@ -66,7 +66,7 @@ class PathPdo extends SimplePdo
      * 
      * @param string $query The SQL query to execute
      * @param array<int|string,mixed> $params Parameters for prepared statement
-     * @param array<string,string> $paths Optional path mappings for table aliases (overrides SQL comment hints)
+     * @param array<string,string> $paths Optional path mappings for table aliases
      *                     Format: ['alias' => '$.path', 'other' => '$.parent.child[]']
      * @return array<int|string,mixed> Hierarchical result structure based on inferred paths
      * @throws \RuntimeException If query execution fails
@@ -90,7 +90,7 @@ class PathPdo extends SimplePdo
         // Analyze query and infer paths
         $this->queryAnalyzer->analyze($query);
 
-        // Merge provided paths into path hints (overrides SQL comment hints)
+        // Merge provided paths into path hints
         if (!empty($paths)) {
             $this->queryAnalyzer->pathHints = array_merge($this->queryAnalyzer->pathHints, $paths);
         }

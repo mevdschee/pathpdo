@@ -13,8 +13,10 @@ class PathInferenceTest extends PdoTestCase
     {
         $this->assertNotNull(static::$pdo);
         $analyzer = new QueryAnalyzer();
-        $sql = 'select p.id as "p.id", c.id as "c.id" from posts p left join comments c on c.post_id = p.id where p.id=1 order by c.id -- PATH p $[].p -- PATH c $[].c';
+        $sql = 'select p.id as "p.id", c.id as "c.id" from posts p left join comments c on c.post_id = p.id where p.id=1 order by c.id';
         $analyzer->analyze($sql);
+        // Set path hints via the pathHints property (simulating the paths parameter)
+        $analyzer->pathHints = ['p' => '$[].p', 'c' => '$[].c'];
 
         $cols = $analyzer->parseSelectColumns($sql);
 
@@ -66,8 +68,10 @@ class PathInferenceTest extends PdoTestCase
         $this->assertNotNull(static::$pdo);
         $analyzer = new QueryAnalyzer();
         // Just the count object
-        $sql = 'select count(*) as posts from posts -- PATH $ $.posts';
+        $sql = 'select count(*) as posts from posts';
         $analyzer->analyze($sql);
+        // Set path hints via the pathHints property (simulating the paths parameter)
+        $analyzer->pathHints = ['$' => '$.posts'];
         $cols = $analyzer->parseSelectColumns($sql);
 
         $schema = new Schema();
