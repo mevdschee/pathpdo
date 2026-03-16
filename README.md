@@ -189,6 +189,3 @@ $results = $db->pathQuery(
 //   ]
 // }
 ```
-
-**Note:** When both SQL comment paths and the `$paths` parameter are provided,
-the `$paths` parameter takes precedence.
