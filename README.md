@@ -122,7 +122,7 @@ $db = PathPdo::create($username, $password, $database);
 $results = $db->pathQuery('SELECT `id`,`name` FROM `users`');
 // Returns: [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
 
-// With parameters
+// With parameters (named/ordered)
 $results = $db->pathQuery('SELECT * FROM users WHERE id = :id', ['id' => 1]);
 $results = $db->pathQuery('SELECT * FROM users WHERE id = ?', [1]);
 ```
