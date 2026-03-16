@@ -8,6 +8,8 @@ class SimplePdoTest extends PdoTestCase
     static $pdo;
     /** @var class-string */
     static $class = '\Tqdev\PdoJson\SimplePdo';
+    /** @var \Tqdev\PdoJson\SimplePdo|null */
+    protected $db;
 
     /**
      * @param array<int, string> $b
@@ -41,7 +43,7 @@ class SimplePdoTest extends PdoTestCase
     public function testInsert(string $a, array $b): void
     {
         $this->assertNotNull($this->db);
-        $this->assertIsInt($this->db->insert($a, $b));
+        $this->assertGreaterThan(0, $this->db->insert($a, $b));
     }
 
     /**

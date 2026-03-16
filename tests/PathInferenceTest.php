@@ -11,6 +11,7 @@ class PathInferenceTest extends PdoTestCase
 {
     public function testInferPathsWithFlatJoin(): void
     {
+        $this->assertNotNull(static::$pdo);
         $analyzer = new QueryAnalyzer();
         $sql = 'select p.id as "p.id", c.id as "c.id" from posts p left join comments c on c.post_id = p.id where p.id=1 order by c.id -- PATH p $[].p -- PATH c $[].c';
         $analyzer->analyze($sql);
@@ -26,6 +27,7 @@ class PathInferenceTest extends PdoTestCase
 
     public function testInferPathsWithNestedOneToMany(): void
     {
+        $this->assertNotNull(static::$pdo);
         $analyzer = new QueryAnalyzer();
         $sql = 'select p.id, c.id from posts p left join comments c on c.post_id = p.id where p.id<=2 order by p.id, c.id';
         $analyzer->analyze($sql);
@@ -43,6 +45,7 @@ class PathInferenceTest extends PdoTestCase
 
     public function testInferPathsWithNestedManyToOne(): void
     {
+        $this->assertNotNull(static::$pdo);
         $analyzer = new QueryAnalyzer();
         $sql = 'select c.id, p.id from comments c join posts p on c.post_id = p.id where p.id<=2 order by c.id, p.id';
         $analyzer->analyze($sql);
@@ -60,6 +63,7 @@ class PathInferenceTest extends PdoTestCase
 
     public function testInferPathsWithAliasHints(): void
     {
+        $this->assertNotNull(static::$pdo);
         $analyzer = new QueryAnalyzer();
         // Just the count object
         $sql = 'select count(*) as posts from posts -- PATH $ $.posts';

@@ -24,14 +24,16 @@ class PdoTestCase extends TestCase
         if (!is_array($phpunitConfig)) {
             throw new \RuntimeException("Invalid config format");
         }
-        $username = (string)($phpunitConfig['username'] ?? '');
-        $password = (string)($phpunitConfig['password'] ?? '');
-        $database = (string)($phpunitConfig['database'] ?? '');
-        $driver = (string)($phpunitConfig['driver'] ?? 'mysql');
-        $address = (string)($phpunitConfig['address'] ?? 'localhost');
-        $port = (string)($phpunitConfig['port'] ?? '');
+        $username = is_string($phpunitConfig['username'] ?? null) ? $phpunitConfig['username'] : '';
+        $password = is_string($phpunitConfig['password'] ?? null) ? $phpunitConfig['password'] : '';
+        $database = is_string($phpunitConfig['database'] ?? null) ? $phpunitConfig['database'] : '';
+        $driver = is_string($phpunitConfig['driver'] ?? null) ? $phpunitConfig['driver'] : 'mysql';
+        $address = is_string($phpunitConfig['address'] ?? null) ? $phpunitConfig['address'] : 'localhost';
+        $port = is_string($phpunitConfig['port'] ?? null) ? $phpunitConfig['port'] : '';
         $class = static::$class;
-        static::$pdo = $class::create($username, $password, $database, $driver, $address, $port);
+        $pdo = $class::create($username, $password, $database, $driver, $address, $port);
+        assert($pdo instanceof \Tqdev\PdoJson\SmartPdo);
+        static::$pdo = $pdo;
         static::$pdo->beginTransaction();
     }
 

@@ -8,6 +8,8 @@ class PathPdoTest extends PdoTestCase
     static $pdo;
     /** @var class-string */
     static $class = '\Tqdev\PdoJson\PathPdo';
+    /** @var \Tqdev\PdoJson\PathPdo|null */
+    protected $db;
 
     /**
      * @param array<int|string,mixed> $b
@@ -21,7 +23,7 @@ class PathPdoTest extends PdoTestCase
     }
 
     /**
-     * @return array<string,array{0: string, 1: array<int|string,mixed>, 2: string}>
+     * @return array<string,array{0:string,1:array<int|string,mixed>,2:string}>
      */
     public static function pathQueryDataProvider(): array
     {
@@ -216,7 +218,6 @@ class PathPdoTest extends PdoTestCase
             ]
         );
 
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('data', $result);
         $this->assertIsArray($result['data']);
         $this->assertArrayHasKey('id', $result['data']);
@@ -237,7 +238,6 @@ class PathPdoTest extends PdoTestCase
             ['p' => '$[]']
         );
 
-        $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertIsArray($result[0]);
         $this->assertEquals(1, $result[0]['id']);

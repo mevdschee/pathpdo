@@ -8,6 +8,7 @@ class SchemaTest extends PdoTestCase
 {
     public function testGetForeignKeysFromDatabase(): void
     {
+        $this->assertNotNull(static::$pdo);
         $schema = new Schema();
         $fks = $schema->getForeignKeys(static::$pdo);
 
@@ -29,6 +30,7 @@ class SchemaTest extends PdoTestCase
 
     public function testExportAndLoadMetadata(): void
     {
+        $this->assertNotNull(static::$pdo);
         $schema = new Schema();
         $tempFile = sys_get_temp_dir() . '/pathpdo_test_' . uniqid() . '.json';
 
@@ -39,10 +41,12 @@ class SchemaTest extends PdoTestCase
 
             // Load metadata from file
             Schema::setMetadataFile($tempFile);
+            $this->assertNotNull(static::$pdo);
             $fksFromFile = $schema->getForeignKeys(static::$pdo);
 
             // Reset to database mode
             Schema::setMetadataFile(null);
+            $this->assertNotNull(static::$pdo);
             $fksFromDb = $schema->getForeignKeys(static::$pdo);
 
             // Should be the same
@@ -69,6 +73,7 @@ class SchemaTest extends PdoTestCase
 
     public function testExportPhpFormat(): void
     {
+        $this->assertNotNull(static::$pdo);
         $schema = new Schema();
         $tempFile = sys_get_temp_dir() . '/pathpdo_test_' . uniqid() . '.php';
 
@@ -86,6 +91,7 @@ class SchemaTest extends PdoTestCase
 
             // Load and verify structure
             Schema::setMetadataFile($tempFile);
+            $this->assertNotNull(static::$pdo);
             $fks = $schema->getForeignKeys(static::$pdo);
             $this->assertNotEmpty($fks);
         } finally {
@@ -110,15 +116,17 @@ class SchemaTest extends PdoTestCase
             ]
         ];
         $json = json_encode($metadata);
+        if ($json === false) {
+            $this->fail('Failed to encode metadata to JSON');
+        }
 
         try {
             Schema::setMetaData($json);
+            $this->assertNotNull(static::$pdo);
             $schema = new Schema();
             $fks = $schema->getForeignKeys(static::$pdo);
 
-            $this->assertIsArray($fks);
             $this->assertCount(1, $fks);
-            $this->assertIsArray($fks[0]);
             $this->assertEquals('test_table', $fks[0]['from_table']);
             $this->assertEquals('test_id', $fks[0]['from_column']);
             $this->assertEquals('ref_table', $fks[0]['to_table']);
@@ -158,6 +166,9 @@ class SchemaTest extends PdoTestCase
             ]
         ];
         $json = json_encode($metadata);
+        if ($json === false) {
+            $this->fail('Failed to encode metadata to JSON');
+        }
 
         try {
             Schema::setMetaData($json);
