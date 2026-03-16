@@ -4,19 +4,24 @@ namespace Tqdev\PdoJson\Tests;
 
 class PathPdoTest extends PdoTestCase
 {
+    /** @var \Tqdev\PdoJson\PathPdo|null */
     static $pdo;
+    /** @var class-string */
     static $class = '\Tqdev\PdoJson\PathPdo';
 
     /**
      * @dataProvider pathQueryDataProvider
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('pathQueryDataProvider')]
-    public function testPathQuery($a, $b, $expected)
+    public function testPathQuery(string $a, array $b, string $expected): void
     {
         $this->assertSame($expected, json_encode($this->db->pathQuery($a, $b)));
     }
 
-    public static function pathQueryDataProvider()
+    /**
+     * @return array<string, array{0: string, 1: array<int|string, mixed>, 2: string}>
+     */
+    public static function pathQueryDataProvider(): array
     {
         return [
             // --- No-path flat array (fast path, no "$" aliases) ---
@@ -124,7 +129,7 @@ class PathPdoTest extends PdoTestCase
     /**
      * Test pathQuery with explicit paths parameter
      */
-    public function testPathQueryWithPathsParameter()
+    public function testPathQueryWithPathsParameter(): void
     {
         // Single object result with paths parameter
         $result = $this->db->pathQuery(
@@ -135,7 +140,7 @@ class PathPdoTest extends PdoTestCase
         $this->assertEquals(['statistics' => ['posts' => 12]], $result);
     }
 
-    public function testPathQueryWithPathsParameterNestedArrays()
+    public function testPathQueryWithPathsParameterNestedArrays(): void
     {
         // Posts with comments using paths parameter
         $result = $this->db->pathQuery(
@@ -162,7 +167,7 @@ class PathPdoTest extends PdoTestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testPathQueryWithPathsParameterOverridesComments()
+    public function testPathQueryWithPathsParameterOverridesComments(): void
     {
         // Paths parameter should override SQL comment hints
         $result = $this->db->pathQuery(
@@ -189,7 +194,7 @@ class PathPdoTest extends PdoTestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testPathQueryWithPathsParameterMultipleLevels()
+    public function testPathQueryWithPathsParameterMultipleLevels(): void
     {
         // Test deeply nested paths
         $result = $this->db->pathQuery(
@@ -206,13 +211,16 @@ class PathPdoTest extends PdoTestCase
         );
 
         $this->assertArrayHasKey('data', $result);
+        $this->assertIsArray($result['data']);
         $this->assertArrayHasKey('id', $result['data']);
+        $this->assertIsArray($result['data']);
         $this->assertEquals(2, $result['data']['id']);
         $this->assertArrayHasKey('comments', $result['data']);
+        $this->assertIsArray($result['data']['comments']);
         $this->assertCount(4, $result['data']['comments']);
     }
 
-    public function testPathQueryWithPathsParameterArrayRoot()
+    public function testPathQueryWithPathsParameterArrayRoot(): void
     {
         // Test array at root level
         $result = $this->db->pathQuery(
@@ -223,12 +231,15 @@ class PathPdoTest extends PdoTestCase
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
+        $this->assertIsArray($result[0]);
         $this->assertEquals(1, $result[0]['id']);
+        $this->assertIsArray($result[1]);
         $this->assertEquals(2, $result[1]['id']);
+        $this->assertIsArray($result[0]);
         $this->assertEquals('blog started', $result[0]['content']);
     }
 
-    public function testPathQueryWithEmptyPathsParameter()
+    public function testPathQueryWithEmptyPathsParameter(): void
     {
         // Empty paths parameter should work like normal query
         $result = $this->db->pathQuery(

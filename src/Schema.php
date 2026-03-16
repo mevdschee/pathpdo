@@ -7,10 +7,10 @@ class Schema
     /** @var string|null */
     private static $metadataFile = null;
 
-    /** @var array<string, array>|null */
+    /** @var array<string,array<int,array<string,string>>>|null */
     private static $fileMetadata = null;
 
-    /** @var array<string, array> */
+    /** @var array<string,array<int,array<string,string>>> */
     private static $foreignKeysCache = [];
 
     /**
@@ -42,6 +42,7 @@ class Schema
             throw new \RuntimeException("Metadata must be a JSON object/array");
         }
 
+        /** @var array<string,array<int,array<string,string>>> $data */
         self::$fileMetadata = $data;
         self::$metadataFile = null; // Clear file path when using direct metadata
     }
@@ -58,13 +59,21 @@ class Schema
     {
         // If we have cached metadata, return it
         if (self::$fileMetadata !== null) {
-            return json_encode(self::$fileMetadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            $json = json_encode(self::$fileMetadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            if ($json === false) {
+                throw new \RuntimeException("Failed to encode metadata as JSON");
+            }
+            return $json;
         }
 
         // If a metadata file is configured, load from it
         if (self::$metadataFile !== null) {
             $metadata = self::loadMetadataFromFile();
-            return json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            $json = json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            if ($json === false) {
+                throw new \RuntimeException("Failed to encode metadata as JSON");
+            }
+            return $json;
         }
 
         // Otherwise, query the database
@@ -76,7 +85,11 @@ class Schema
             'foreign_keys' => $this->getForeignKeysFromDatabase($db),
         ];
 
-        return json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $json = json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            throw new \RuntimeException("Failed to encode metadata as JSON");
+        }
+        return $json;
     }
 
     /**
@@ -102,7 +115,7 @@ class Schema
     /**
      * Load metadata from the configured file.
      * 
-     * @return array<string, array>
+     * @return array<string, mixed>
      * @throws \RuntimeException
      */
     private static function loadMetadataFromFile(): array
@@ -127,6 +140,7 @@ class Schema
         // Try JSON first
         $data = json_decode($contents, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+            /** @var array<string,array<int,array<string,string>>> $data */
             self::$fileMetadata = $data;
             return $data;
         }
@@ -135,6 +149,7 @@ class Schema
         if (str_starts_with(trim($contents), '<?php')) {
             $data = include self::$metadataFile;
             if (is_array($data)) {
+                /** @var array<string,array<int,array<string,string>>> $data */
                 self::$fileMetadata = $data;
                 return $data;
             }
@@ -147,7 +162,7 @@ class Schema
      * Save metadata to a file.
      * 
      * @param string $filename Path to save metadata to
-     * @param array $metadata Metadata array to save
+     * @param array<string, mixed> $metadata Metadata array to save
      * @param string $format Format: 'json' or 'php' (default: 'json')
      * @throws \RuntimeException
      */
@@ -186,12 +201,16 @@ class Schema
      * - from_column
      * - to_table
      * - to_column
+     * 
+     * @return array<int,array<string,string>>
      */
     public function getForeignKeys(SmartPdo $db): array
     {
         // Check if we have directly set metadata (via setMetaData)
         if (self::$fileMetadata !== null) {
-            return self::$fileMetadata['foreign_keys'] ?? [];
+            /** @var array<int,array<string,string>> $data */
+            $data = self::$fileMetadata['foreign_keys'] ?? [];
+            return $data;
         }
 
         // Check if we should use file-based metadata
@@ -205,19 +224,21 @@ class Schema
     /**
      * Get foreign keys from configured metadata file.
      * 
-     * @return array
+     * @return array<int,array<string,string>>
      */
     private function getForeignKeysFromFile(): array
     {
         $metadata = self::loadMetadataFromFile();
-        return $metadata['foreign_keys'] ?? [];
+        /** @var array<int,array<string,string>> $data */
+        $data = $metadata['foreign_keys'] ?? [];
+        return $data;
     }
 
     /**
      * Get foreign keys by querying the database.
      * 
      * @param SmartPdo $db
-     * @return array
+     * @return array<int,array<string,string>>
      */
     private function getForeignKeysFromDatabase(SmartPdo $db): array
     {
@@ -240,7 +261,11 @@ class Schema
                     WHERE REFERENCED_TABLE_NAME IS NOT NULL 
                       AND TABLE_SCHEMA = DATABASE()
                 ";
-                $fks = $db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+                $stmt = $db->query($sql);
+                if ($stmt === false) {
+                    break;
+                }
+                $fks = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                 break;
             case 'pgsql':
                 $sql = "
@@ -259,7 +284,11 @@ class Schema
                     WHERE tc.constraint_type = 'FOREIGN KEY'
                       AND tc.table_schema = current_schema()
                 ";
-                $fks = $db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+                $stmt = $db->query($sql);
+                if ($stmt === false) {
+                    break;
+                }
+                $fks = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                 break;
             case 'sqlsrv':
                 $sql = "
@@ -275,12 +304,17 @@ class Schema
                     INNER JOIN sys.columns cp ON fkc.parent_column_id = cp.column_id AND fkc.parent_object_id = cp.object_id
                     INNER JOIN sys.columns cr ON fkc.referenced_column_id = cr.column_id AND fkc.referenced_object_id = cr.object_id
                 ";
-                $fks = $db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+                $stmt = $db->query($sql);
+                if ($stmt === false) {
+                    break;
+                }
+                $fks = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                 break;
                 // Add sqlite fallback later if needed.
         }
-
-        self::$foreignKeysCache[$driver] = $fks;
-        return $fks;
+        /** @var array<int,array<string,string>> $data */
+        $data = $fks;
+        self::$foreignKeysCache[$driver] = $data;
+        return $data;
     }
 }

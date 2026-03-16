@@ -4,9 +4,11 @@ namespace Tqdev\PdoJson;
 
 class SmartPdo extends LazyPdo
 {
-    protected $driver;
-    protected $options;
-    protected $commands;
+    protected string $driver;
+    /** @var array<int, mixed> */
+    protected array $options;
+    /** @var array<int,string> */
+    protected array $commands;
 
     /**
      * Constructs a smart PDO connection with driver-specific optimizations.
@@ -14,12 +16,13 @@ class SmartPdo extends LazyPdo
      * @param string $dsn The Data Source Name
      * @param string|null $username The username for the database connection
      * @param string|null $password The password for the database connection
-     * @param array $options Driver-specific connection options
+     * @param array<int, mixed> $options Driver-specific connection options
      * @throws \Exception If the driver is not supported
      */
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = array())
     {
-        $this->driver = strtolower(substr($dsn, 0, strpos($dsn, ':')));
+        $colonPos = strpos($dsn, ':');
+        $this->driver = strtolower(substr($dsn, 0, $colonPos !== false ? $colonPos : 0));
         if (!in_array($this->driver, ['mysql', 'pgsql', 'sqlsrv'])) {
             throw new \Exception(sprintf('Driver "%s" is not supported', $this->driver));
         }
@@ -78,7 +81,7 @@ class SmartPdo extends LazyPdo
      * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
      * @param string $address The database server address
      * @param string $port The database server port (uses default if empty)
-     * @param array $options Additional PDO options
+     * @param array<int, mixed> $options Additional PDO options
      * @return SmartPdo A new SmartPdo instance
      */
     public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array()): SmartPdo
@@ -91,27 +94,38 @@ class SmartPdo extends LazyPdo
      * Execute a SQL query with optional parameters and return handling.
      * 
      * @param string $statement The SQL statement to execute
-     * @param array $params Parameters for prepared statement
+     * @param array<int|string, mixed> $params Parameters for prepared statement
      * @param bool $returnNumAffected Return number of rows affected instead of results
      * @param bool $returnLastInsertId Return the last insert ID instead of results
-     * @return array|int Array of results, row count, or last insert ID
+     * @return array<int|string, mixed>|int Array of results, row count, or last insert ID
      */
-    public function smartQuery(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false)
+    public function smartQuery(string $statement, array $params = [], bool $returnNumAffected = false, bool $returnLastInsertId = false): array|int
     {
         if (empty($params)) {
             $stmt = $this->query($statement);
         } else {
             $stmt = $this->prepare($statement);
+            if ($stmt === false) {
+                return $returnNumAffected || $returnLastInsertId ? 0 : [];
+            }
             $stmt->execute($params);
+        }
+        if ($stmt === false) {
+            return $returnNumAffected || $returnLastInsertId ? 0 : [];
         }
         if ($returnNumAffected) {
             return $stmt->rowCount();
         } else if ($returnLastInsertId) {
-            return $this->lastInsertId() ?: 0;
+            $lastId = $this->lastInsertId();
+            return is_numeric($lastId) ? (int)$lastId : 0;
         }
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param array<int,string> $commands
+     * @return array<int,string>
+     */
     protected function getCommands(array $commands): array
     {
         switch ($this->driver) {
@@ -129,6 +143,10 @@ class SmartPdo extends LazyPdo
         return $commands;
     }
 
+    /**
+     * @param array<int, mixed> $options
+     * @return array<int, mixed>
+     */
     protected function getOptions(array $options): array
     {
         $options += array(

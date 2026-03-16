@@ -4,9 +4,12 @@ namespace Tqdev\PdoJson;
 
 class QueryAnalyzer
 {
-    public $tables = []; // alias => table name
-    public $joins = []; // list of join info arrays
-    public $pathHints = []; // alias => path override
+    /** @var array<string, string> */
+    public array $tables = []; // alias => table name
+    /** @var array<int, array<string, mixed>> */
+    public array $joins = []; // list of join info arrays
+    /** @var array<string, string> */
+    public array $pathHints = []; // alias => path override
 
     /**
      * Analyze a SQL query to extract tables, joins, and path hints.
@@ -24,6 +27,9 @@ class QueryAnalyzer
         $this->extractJoins($sqlNoComments);
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function extractPathHints(string $sql): array
     {
         $hints = [];
@@ -42,9 +48,9 @@ class QueryAnalyzer
     private function removeComments(string $sql): string
     {
         // Remove single-line comments
-        $sql = preg_replace('/--[^\n]*/', '', $sql);
+        $sql = (string)preg_replace('/--[^\n]*/', '', $sql);
         // Remove multi-line comments
-        $sql = preg_replace('|/\*.*?\*/|s', '', $sql);
+        $sql = (string)preg_replace('|/\*.*?\*/|s', '', $sql);
         return $sql;
     }
 
@@ -62,7 +68,7 @@ class QueryAnalyzer
                 }
 
                 $parts = preg_split('/\s+/', $tableSpec);
-                if (count($parts) >= 1) {
+                if (is_array($parts)) {
                     $tableName = $parts[0];
                     // Clean quotes/ticks if any
                     $tableName = trim($tableName, '`"\'');
@@ -164,6 +170,9 @@ class QueryAnalyzer
         }
     }
 
+    /**
+     * @return array<int, array<string, string>>
+     */
     private function parseJoinCondition(string $condition): array
     {
         $columns = [];
@@ -184,7 +193,7 @@ class QueryAnalyzer
      * Parse the SELECT columns from a query.
      * 
      * @param string $query The SQL query
-     * @return array Array of column names/aliases from the SELECT clause
+     * @return array<int,string> Array of column names/aliases from the SELECT clause
      */
     public function parseSelectColumns(string $query): array
     {

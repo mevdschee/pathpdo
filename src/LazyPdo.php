@@ -4,13 +4,15 @@ namespace Tqdev\PdoJson;
 
 class LazyPdo extends \PDO
 {
-    private $dsn;
-    private $user;
-    private $password;
-    private $options;
-    private $commands;
+    private string $dsn;
+    private ?string $user;
+    private ?string $password;
+    /** @var array<string|int,mixed> */
+    private array $options;
+    /** @var array<string> */
+    private array $commands;
 
-    private $pdo = null;
+    private ?\PDO $pdo = null;
 
     /**
      * Constructs a lazy PDO connection that only connects when needed.
@@ -18,7 +20,7 @@ class LazyPdo extends \PDO
      * @param string $dsn The Data Source Name
      * @param string|null $user The username for the database connection
      * @param string|null $password The password for the database connection
-     * @param array $options Driver-specific connection options
+     * @param array<int,mixed> $options Driver-specific connection options
      */
     public function __construct(string $dsn, ?string $user = null, ?string $password = null, array $options = array())
     {
@@ -40,7 +42,7 @@ class LazyPdo extends \PDO
         $this->commands[] = $command;
     }
 
-    private function pdo()
+    private function pdo(): \PDO
     {
         if (!$this->pdo) {
             $this->pdo = new \PDO($this->dsn, $this->user, $this->password, $this->options);
@@ -57,7 +59,7 @@ class LazyPdo extends \PDO
      * @param string $dsn The Data Source Name
      * @param string|null $user The username for the database connection
      * @param string|null $password The password for the database connection
-     * @param array $options Driver-specific connection options
+     * @param array<int,mixed> $options Driver-specific connection options
      * @return bool True if an existing connection was closed, false otherwise
      */
     public function reconstruct(string $dsn, ?string $user = null, ?string $password = null, array $options = array()): bool
@@ -155,7 +157,7 @@ class LazyPdo extends \PDO
     /**
      * Fetch extended error information.
      * 
-     * @return array Array containing error information
+     * @return array<int|string, mixed> Array containing error information
      */
     public function errorInfo(): array
     {
@@ -177,7 +179,7 @@ class LazyPdo extends \PDO
      * Prepares a statement for execution.
      * 
      * @param string $query The SQL query to prepare
-     * @param array $options Driver-specific options for the statement
+     * @param array<int,mixed> $options Driver-specific options for the statement
      * @return \PDOStatement|false Prepared statement or false on failure
      */
     public function prepare(string $query, array $options = []): \PDOStatement|false

@@ -4,9 +4,9 @@ namespace Tqdev\PdoJson;
 
 class PathPdo extends SimplePdo
 {
-    private $schema;
-    private $queryAnalyzer;
-    private $pathInference;
+    private Schema $schema;
+    private QueryAnalyzer $queryAnalyzer;
+    private PathInference $pathInference;
 
     /**
      * Constructs a PathPdo instance with path inference capabilities.
@@ -14,7 +14,7 @@ class PathPdo extends SimplePdo
      * @param string $dsn The Data Source Name
      * @param string|null $username The username for the database connection
      * @param string|null $password The password for the database connection
-     * @param array $options Driver-specific connection options
+     * @param array<int, mixed> $options Driver-specific connection options
      */
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = [])
     {
@@ -33,7 +33,7 @@ class PathPdo extends SimplePdo
      * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
      * @param string $address The database server address
      * @param string $port The database server port (uses default if empty)
-     * @param array $options Additional PDO options
+     * @param array<int, mixed> $options Additional PDO options
      * @return PathPdo A new PathPdo instance
      * @throws \Exception If the driver is not supported
      */
@@ -65,18 +65,25 @@ class PathPdo extends SimplePdo
      * foreign key relationships, returning nested arrays/objects instead of flat rows.
      * 
      * @param string $query The SQL query to execute
-     * @param array $params Parameters for prepared statement
-     * @param array $paths Optional path mappings for table aliases (overrides SQL comment hints)
+     * @param array<int|string, mixed> $params Parameters for prepared statement
+     * @param array<string, string> $paths Optional path mappings for table aliases (overrides SQL comment hints)
      *                     Format: ['alias' => '$.path', 'other' => '$.parent.child[]']
-     * @return array|object Hierarchical result structure based on inferred paths
+     * @return array<int|string, mixed> Hierarchical result structure based on inferred paths
+     * @throws \RuntimeException If query execution fails
      */
-    public function pathQuery(string $query, array $params = [], array $paths = [])
+    public function pathQuery(string $query, array $params = [], array $paths = []): array
     {
         if (empty($params)) {
             $statement = $this->query($query);
         } else {
             $statement = $this->prepare($query);
+            if ($statement === false) {
+                throw new \RuntimeException("Failed to prepare statement");
+            }
             $statement->execute($params);
+        }
+        if ($statement === false) {
+            throw new \RuntimeException("Failed to execute query");
         }
         $pdoColumns = $this->getColumns($statement);
 
@@ -125,21 +132,37 @@ class PathPdo extends SimplePdo
         return $result;
     }
 
-    private function getColumns($statement): array
+    /**
+     * @return array<int,string>
+     */
+    private function getColumns(\PDOStatement $statement): array
     {
         $columns = [];
         for ($i = 0; $i < $statement->columnCount(); $i++) {
-            $columns[] = $statement->getColumnMeta($i)['name'];
+            $meta = $statement->getColumnMeta($i);
+            if ($meta !== false) {
+                $columns[] = $meta['name'];
+            }
         }
         return $columns;
     }
 
-    private function getAllRecords($statement, array $paths): array
+    /**
+     * @param array<int,string> $paths
+     * @return array<int, array<int|string, mixed>>
+     */
+    private function getAllRecords(\PDOStatement $statement, array $paths): array
     {
         $records = [];
         while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
+            if (!is_array($row)) {
+                continue;
+            }
             $record = [];
             foreach ($row as $i => $value) {
+                if (!isset($paths[$i])) {
+                    continue;
+                }
                 $path = $paths[$i];
                 // Strip leading "$" if present, else keep the dot (e.g. .id)
                 $record[($path[0] === '$' ? substr($path, 1) : $path)] = $value;
@@ -149,11 +172,15 @@ class PathPdo extends SimplePdo
         return $records;
     }
 
+    /**
+     * @param array<int|string, mixed> $record
+     * @return array<string, mixed>
+     */
     private function buildObject(array $record): array
     {
         $result = [];
         foreach ($record as $key => $value) {
-            $key = ltrim($key, '.');
+            $key = ltrim((string)$key, '.');
             $parts = explode('.', $key);
             $current = &$result;
             foreach ($parts as $i => $part) {
@@ -171,26 +198,34 @@ class PathPdo extends SimplePdo
         return $result;
     }
 
+    /**
+     * @param array<int, array<int|string, mixed>> $records
+     * @return array<int, array<string, mixed>>
+     */
     private function buildFlatArray(array $records): array
     {
         $results = [];
         foreach ($records as $record) {
             $obj = [];
             foreach ($record as $key => $value) {
-                $obj[ltrim($key, '.')] = $value;
+                $obj[ltrim((string)$key, '.')] = $value;
             }
             $results[] = $obj;
         }
         return $results;
     }
 
+    /**
+     * @param array<int, array<int|string, mixed>> $records
+     * @return array<int, array<string, array<string, mixed>>>
+     */
     private function groupBySeparator(array $records, string $separator): array
     {
         $results = [];
         foreach ($records as $record) {
             $result = [];
             foreach ($record as $name => $value) {
-                $parts   = explode($separator, $name);
+                $parts   = $separator !== '' ? explode($separator, (string)$name) : [(string)$name];
                 $newName = array_pop($parts);
                 $path    = implode($separator, $parts);
                 if ($parts) {
@@ -206,6 +241,10 @@ class PathPdo extends SimplePdo
         return $results;
     }
 
+    /**
+     * @param array<int, array<string, array<string, mixed>>> $records
+     * @return array<int, array<int|string, mixed>>
+     */
     private function addHashes(array $records): array
     {
         $results = [];
@@ -215,7 +254,11 @@ class PathPdo extends SimplePdo
                 if (substr($key, -2) != '[]') {
                     continue;
                 }
-                $hash             = md5(json_encode($part));
+                $jsonEncoded = json_encode($part);
+                if ($jsonEncoded === false) {
+                    $jsonEncoded = '';
+                }
+                $hash             = md5($jsonEncoded);
                 $mapping[$key]    = substr($key, 0, -2) . '.!' . $hash . '!';
             }
             uksort($mapping, function ($a, $b) {
@@ -223,42 +266,55 @@ class PathPdo extends SimplePdo
             });
             $keys    = array_keys($record);
             $values  = array_values($record);
-            $newKeys = str_replace(array_keys($mapping), array_values($mapping), $keys);
+            $newKeys = str_replace(array_keys($mapping), array_values($mapping), array_map('strval', $keys));
             $results[] = array_combine($newKeys, $values);
         }
         return $results;
     }
 
+    /**
+     * @param array<int, array<int|string, mixed>> $records
+     * @return array<mixed>
+     */
     private function combineIntoTree(array $records, string $separator): array
     {
         /** @var array<string, mixed> $results */
         $results = [];
         foreach ($records as $record) {
             foreach ($record as $name => $value) {
+                if (!is_array($value)) {
+                    continue;
+                }
                 foreach ($value as $key => $v) {
-                    $path    = explode($separator, $name . $key);
+                    $path    = $separator !== '' ? explode($separator, (string)$name . (string)$key) : [(string)$name . (string)$key];
                     $newName = array_pop($path);
                     $current = &$results;
                     foreach ($path as $p) {
                         if (!isset($current[$p])) {
                             $current[$p] = [];
                         }
-                        $current = &$current[$p];
+                        if (is_array($current[$p])) {
+                            $current = &$current[$p];
+                        }
                     }
                     $current[$newName] = $v;
                 }
             }
         }
-        return $results[''] ?? [];
+        return isset($results['']) && is_array($results['']) ? $results[''] : [];
     }
 
+    /**
+     * @param array<mixed> $tree
+     * @return array<int|string, mixed>
+     */
     private function removeHashes(array $tree, string $path): array
     {
         $values  = [];
         $trees   = [];
         $results = [];
         foreach ($tree as $key => $value) {
-            if (is_array($value)) {
+            if (is_array($tree[$key])) {
                 if (substr($key, 0, 1) == '!' && substr($key, -1, 1) == '!') {
                     $results[] = $this->removeHashes($tree[$key], $path . '[]');
                 } else {

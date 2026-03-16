@@ -4,7 +4,7 @@ namespace Tqdev\PdoJson;
 
 class PathInference
 {
-    private $schema;
+    private Schema $schema;
 
     /**
      * Constructs a PathInference instance.
@@ -23,9 +23,9 @@ class PathInference
      * to determine the hierarchical path for each column in the result set.
      * 
      * @param QueryAnalyzer $analysis The analyzed query information
-     * @param array $columns Array of column names to infer paths for
+     * @param array<int,string> $columns Array of column names to infer paths for
      * @param SmartPdo $db Database connection for schema queries
-     * @return array Array of paths corresponding to each column
+     * @return array<int,string> Array of paths corresponding to each column
      */
     public function inferPaths(QueryAnalyzer $analysis, array $columns, SmartPdo $db): array
     {
@@ -39,6 +39,9 @@ class PathInference
         return $paths;
     }
 
+    /**
+     * @return array<string, bool>
+     */
     private function buildCardinalityMap(QueryAnalyzer $analysis, SmartPdo $db): array
     {
         $cardinality = [];
@@ -47,7 +50,9 @@ class PathInference
         $rootAlias = '';
         $joinedAliases = [];
         foreach ($analysis->joins as $join) {
-            $joinedAliases[$join['rightAlias']] = true;
+            if (isset($join['rightAlias']) && is_string($join['rightAlias'])) {
+                $joinedAliases[$join['rightAlias']] = true;
+            }
         }
 
         foreach ($analysis->tables as $alias => $tableName) {
@@ -82,30 +87,43 @@ class PathInference
         }
 
         foreach ($analysis->joins as $join) {
-            $cardinality[$join['rightAlias']] = $this->isOneToManyJoin($join, $allFks);
+            if (isset($join['rightAlias']) && is_string($join['rightAlias'])) {
+                $cardinality[$join['rightAlias']] = $this->isOneToManyJoin($join, $allFks);
+            }
         }
 
         foreach ($analysis->tables as $alias => $tableName) {
             if (!isset($cardinality[$alias])) {
-                $cardinality[$alias] = true;
+                $cardinality[(string)$alias] = true;
             }
         }
 
         return $cardinality;
     }
 
+    /**
+     * @param array<string, mixed> $join
+     * @param array<int, array<string, string>> $allFks
+     */
     private function isOneToManyJoin(array $join, array $allFks): bool
     {
         if (empty($join['onColumns'])) {
             return in_array($join['joinType'], ['LEFT', 'LEFT OUTER']);
         }
 
+        if (!is_array($join['onColumns'])) {
+            return in_array($join['joinType'], ['LEFT', 'LEFT OUTER']);
+        }
+
         foreach ($join['onColumns'] as $jc) {
+            if (!is_array($jc)) {
+                continue;
+            }
             foreach ($allFks as $fk) {
                 // Right table has FK to left table -> One to Many
                 if ($fk['from_table'] === $join['rightTable'] && $fk['to_table'] === $join['leftTable']) {
-                    if (($jc['rightAlias'] === $join['rightAlias'] && $jc['rightColumn'] === $fk['from_column']) ||
-                        ($jc['leftAlias'] === $join['rightAlias'] && $jc['leftColumn'] === $fk['from_column'])
+                    if ((isset($jc['rightAlias']) && $jc['rightAlias'] === $join['rightAlias'] && isset($jc['rightColumn']) && $jc['rightColumn'] === $fk['from_column']) ||
+                        (isset($jc['leftAlias']) && $jc['leftAlias'] === $join['rightAlias'] && isset($jc['leftColumn']) && $jc['leftColumn'] === $fk['from_column'])
                     ) {
                         return true;
                     }
@@ -113,8 +131,8 @@ class PathInference
 
                 // Left table has FK to right table -> Many to One
                 if ($fk['from_table'] === $join['leftTable'] && $fk['to_table'] === $join['rightTable']) {
-                    if (($jc['leftAlias'] === $join['leftAlias'] && $jc['leftColumn'] === $fk['from_column']) ||
-                        ($jc['rightAlias'] === $join['leftAlias'] && $jc['rightColumn'] === $fk['from_column'])
+                    if ((isset($jc['leftAlias']) && $jc['leftAlias'] === $join['leftAlias'] && isset($jc['leftColumn']) && $jc['leftColumn'] === $fk['from_column']) ||
+                        (isset($jc['rightAlias']) && $jc['rightAlias'] === $join['leftAlias'] && isset($jc['rightColumn']) && $jc['rightColumn'] === $fk['from_column'])
                     ) {
                         return false;
                     }
@@ -125,6 +143,9 @@ class PathInference
         return in_array($join['joinType'], ['LEFT', 'LEFT OUTER']);
     }
 
+    /**
+     * @param array<string, bool> $cardinality
+     */
     private function inferColumnPath(string $column, QueryAnalyzer $analysis, array $cardinality): string
     {
         $parts = explode('.', $column);
@@ -217,7 +238,9 @@ class PathInference
     {
         $joinedAliases = [];
         foreach ($analysis->joins as $join) {
-            $joinedAliases[$join['rightAlias']] = true;
+            if (isset($join['rightAlias']) && is_string($join['rightAlias'])) {
+                $joinedAliases[$join['rightAlias']] = true;
+            }
         }
         foreach ($analysis->tables as $alias => $tableName) {
             if (!isset($joinedAliases[$alias])) {
@@ -231,7 +254,7 @@ class PathInference
     {
         if (count($analysis->tables) === 1) {
             reset($analysis->tables);
-            return key($analysis->tables) ?? '';
+            return key($analysis->tables) ?: '';
         }
 
         foreach ($analysis->tables as $alias => $tableName) {
@@ -241,12 +264,19 @@ class PathInference
         return '';
     }
 
+    /**
+     * @param array<string, bool> $cardinality
+     */
     private function buildPathToTable(string $targetAlias, QueryAnalyzer $analysis, array $cardinality): string
     {
         $visited = [];
         return $this->buildPathRecursive($targetAlias, $analysis, $cardinality, $visited);
     }
 
+    /**
+     * @param array<string, bool> $cardinality
+     * @param array<string, bool> $visited
+     */
     private function buildPathRecursive(string $targetAlias, QueryAnalyzer $analysis, array $cardinality, array &$visited): string
     {
         if (isset($visited[$targetAlias])) {

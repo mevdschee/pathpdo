@@ -6,7 +6,7 @@ use Tqdev\PdoJson\Schema;
 
 class SchemaTest extends PdoTestCase
 {
-    public function testGetForeignKeysFromDatabase()
+    public function testGetForeignKeysFromDatabase(): void
     {
         $schema = new Schema();
         $fks = $schema->getForeignKeys(static::$pdo);
@@ -27,7 +27,7 @@ class SchemaTest extends PdoTestCase
         $this->assertEquals('id', $commentsFk['to_column']);
     }
 
-    public function testExportAndLoadMetadata()
+    public function testExportAndLoadMetadata(): void
     {
         $schema = new Schema();
         $tempFile = sys_get_temp_dir() . '/pathpdo_test_' . uniqid() . '.json';
@@ -56,7 +56,7 @@ class SchemaTest extends PdoTestCase
         }
     }
 
-    public function testMetadataFileSetting()
+    public function testMetadataFileSetting(): void
     {
         $this->assertNull(Schema::getMetadataFile());
 
@@ -67,7 +67,7 @@ class SchemaTest extends PdoTestCase
         $this->assertNull(Schema::getMetadataFile());
     }
 
-    public function testExportPhpFormat()
+    public function testExportPhpFormat(): void
     {
         $schema = new Schema();
         $tempFile = sys_get_temp_dir() . '/pathpdo_test_' . uniqid() . '.php';
@@ -79,6 +79,9 @@ class SchemaTest extends PdoTestCase
 
             // Verify it's valid PHP
             $contents = file_get_contents($tempFile);
+            if ($contents === false) {
+                $this->fail('Failed to read temp file');
+            }
             $this->assertStringStartsWith('<?php', $contents);
 
             // Load and verify structure
@@ -94,7 +97,7 @@ class SchemaTest extends PdoTestCase
         }
     }
 
-    public function testSetMetaDataWithValidJson()
+    public function testSetMetaDataWithValidJson(): void
     {
         $metadata = [
             'foreign_keys' => [
@@ -113,7 +116,9 @@ class SchemaTest extends PdoTestCase
             $schema = new Schema();
             $fks = $schema->getForeignKeys(static::$pdo);
 
+            $this->assertIsArray($fks);
             $this->assertCount(1, $fks);
+            $this->assertIsArray($fks[0]);
             $this->assertEquals('test_table', $fks[0]['from_table']);
             $this->assertEquals('test_id', $fks[0]['from_column']);
             $this->assertEquals('ref_table', $fks[0]['to_table']);
@@ -124,7 +129,7 @@ class SchemaTest extends PdoTestCase
         }
     }
 
-    public function testSetMetaDataWithInvalidJson()
+    public function testSetMetaDataWithInvalidJson(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Invalid JSON metadata');
@@ -132,7 +137,7 @@ class SchemaTest extends PdoTestCase
         Schema::setMetaData('invalid json {');
     }
 
-    public function testSetMetaDataWithNonArrayJson()
+    public function testSetMetaDataWithNonArrayJson(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Metadata must be a JSON object/array');
@@ -140,7 +145,7 @@ class SchemaTest extends PdoTestCase
         Schema::setMetaData('"just a string"');
     }
 
-    public function testGetMetaDataFromCache()
+    public function testGetMetaDataFromCache(): void
     {
         $metadata = [
             'foreign_keys' => [
@@ -162,7 +167,9 @@ class SchemaTest extends PdoTestCase
             $decoded = json_decode($retrieved, true);
             $this->assertIsArray($decoded);
             $this->assertArrayHasKey('foreign_keys', $decoded);
+            $this->assertIsArray($decoded['foreign_keys']);
             $this->assertCount(1, $decoded['foreign_keys']);
+            $this->assertIsArray($decoded['foreign_keys'][0]);
             $this->assertEquals('cached_table', $decoded['foreign_keys'][0]['from_table']);
         } finally {
             // Cleanup
@@ -170,7 +177,7 @@ class SchemaTest extends PdoTestCase
         }
     }
 
-    public function testGetMetaDataFromFile()
+    public function testGetMetaDataFromFile(): void
     {
         $metadata = [
             'foreign_keys' => [
@@ -194,6 +201,8 @@ class SchemaTest extends PdoTestCase
             $decoded = json_decode($retrieved, true);
             $this->assertIsArray($decoded);
             $this->assertArrayHasKey('foreign_keys', $decoded);
+            $this->assertIsArray($decoded['foreign_keys']);
+            $this->assertIsArray($decoded['foreign_keys'][0]);
             $this->assertEquals('file_table', $decoded['foreign_keys'][0]['from_table']);
         } finally {
             // Cleanup
@@ -205,7 +214,7 @@ class SchemaTest extends PdoTestCase
         }
     }
 
-    public function testGetMetaDataFromDatabase()
+    public function testGetMetaDataFromDatabase(): void
     {
         Schema::clearCache();
         Schema::setMetadataFile(null);
@@ -220,7 +229,9 @@ class SchemaTest extends PdoTestCase
 
         // Verify it contains actual foreign keys from the test database
         $hasForeignKey = false;
+        $this->assertIsArray($decoded['foreign_keys']);
         foreach ($decoded['foreign_keys'] as $fk) {
+            $this->assertIsArray($fk);
             if (isset($fk['from_table']) && isset($fk['to_table'])) {
                 $hasForeignKey = true;
                 break;
@@ -229,7 +240,7 @@ class SchemaTest extends PdoTestCase
         $this->assertTrue($hasForeignKey);
     }
 
-    public function testGetMetaDataWithoutDatabaseOrCache()
+    public function testGetMetaDataWithoutDatabaseOrCache(): void
     {
         Schema::clearCache();
         Schema::setMetadataFile(null);
@@ -241,7 +252,7 @@ class SchemaTest extends PdoTestCase
         $schema->getMetaData();
     }
 
-    public function testSetMetaDataClearsMetadataFile()
+    public function testSetMetaDataClearsMetadataFile(): void
     {
         $tempFile = sys_get_temp_dir() . '/pathpdo_test_' . uniqid() . '.json';
         file_put_contents($tempFile, '{"foreign_keys":[]}');

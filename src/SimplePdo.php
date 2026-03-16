@@ -13,7 +13,7 @@ class SimplePdo extends SmartPdo
      * @param string $driver The database driver (mysql, pgsql, or sqlsrv)
      * @param string $address The database server address
      * @param string $port The database server port (uses default if empty)
-     * @param array $options Additional PDO options
+     * @param array<int, mixed> $options Additional PDO options
      * @return SimplePdo A new SimplePdo instance
      */
     public static function create(string $username, string $password, string $database, string $driver = 'mysql', string $address = 'localhost', string $port = '', array $options = array()): SimplePdo
@@ -26,7 +26,7 @@ class SimplePdo extends SmartPdo
      * Insert a record into a table.
      * 
      * @param string $table The table name
-     * @param array $record Associative array of column => value pairs
+     * @param array<string, mixed> $record Associative array of column => value pairs
      * @return int The last insert ID or 0 on failure
      */
     public function insert(string $table, array $record): int
@@ -38,16 +38,17 @@ class SimplePdo extends SmartPdo
         $sql = 'INSERT INTO ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlInsertFields($record) . ' VALUES ';
         $sql .= $this->buildSqlInsertValues($params, $record) . ' ';
-        return $this->smartQuery($sql, $params, false, true);
+        $result = $this->smartQuery($sql, $params, false, true);
+        return is_int($result) ? $result : 0;
     }
 
     /**
      * Select records from a table.
      * 
      * @param string $table The table name
-     * @param array $fields Array of field names (empty for all fields)
-     * @param array $conditions Where conditions (key => value or [field, operator, value])
-     * @return array Array of matching records
+     * @param array<int,string> $fields Array of field names (empty for all fields)
+     * @param array<int|string, mixed> $conditions Where conditions (key => value or [field, operator, value])
+     * @return array<int|string, mixed> Array of matching records
      */
     public function select(string $table, array $fields = [], array $conditions = []): array
     {
@@ -58,15 +59,16 @@ class SimplePdo extends SmartPdo
         $sql = 'SELECT ' . $this->buildSqlSelect($fields) . ' ';
         $sql .= 'FROM ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        return $this->smartQuery($sql, $params, false, false);
+        $result = $this->smartQuery($sql, $params, false, false);
+        return is_array($result) ? $result : [];
     }
 
     /**
      * Update records in a table.
      * 
      * @param string $table The table name
-     * @param array $fields Associative array of column => value pairs to update
-     * @param array $conditions Where conditions (key => value or [field, operator, value])
+     * @param array<string, mixed> $fields Associative array of column => value pairs to update
+     * @param array<int|string, mixed> $conditions Where conditions (key => value or [field, operator, value])
      * @return int Number of rows affected
      */
     public function update(string $table, array $fields, array $conditions): int
@@ -78,14 +80,15 @@ class SimplePdo extends SmartPdo
         $sql = 'UPDATE ' . $this->quoteIdentifier($table) . ' ';
         $sql .= 'SET ' . $this->buildSqlSet($params, $fields) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        return $this->smartQuery($sql, $params, true, false);
+        $result = $this->smartQuery($sql, $params, true, false);
+        return is_int($result) ? $result : 0;
     }
 
     /**
      * Delete records from a table.
      * 
      * @param string $table The table name
-     * @param array $conditions Where conditions (key => value or [field, operator, value])
+     * @param array<int|string, mixed> $conditions Where conditions (key => value or [field, operator, value])
      * @return int Number of rows deleted
      */
     public function delete(string $table, array $conditions): int
@@ -96,7 +99,8 @@ class SimplePdo extends SmartPdo
         $params = [];
         $sql = 'DELETE FROM ' . $this->quoteIdentifier($table) . ' ';
         $sql .= $this->buildSqlWhere($params, $conditions);
-        return $this->smartQuery($sql, $params, true);
+        $result = $this->smartQuery($sql, $params, true);
+        return is_int($result) ? $result : 0;
     }
 
     /**
@@ -108,7 +112,7 @@ class SimplePdo extends SmartPdo
     public function quoteIdentifier(string $string): string
     {
         $str = \preg_replace('/[^\.0-9a-zA-Z_\/]/', '', $string);
-        if (\strpos($str, '.') !== false) {
+        if ($str !== null && \strpos($str, '.') !== false) {
             $parts = \explode('.', $str);
             foreach ($parts as $i => $part) {
                 $parts[$i] = $this->quoteIdentifier($part);
@@ -118,6 +122,9 @@ class SimplePdo extends SmartPdo
         return '"' . $str . '"';
     }
 
+    /**
+     * @param array<string, mixed> $record
+     */
     protected function buildSqlInsertFields(array $record): string
     {
         $names = [];
@@ -127,6 +134,10 @@ class SimplePdo extends SmartPdo
         return '(' . \implode(', ', $names) . ')';
     }
 
+    /**
+     * @param array<int, mixed> $params
+     * @param array<string, mixed> $record
+     */
     protected function buildSqlInsertValues(array &$params, array $record): string
     {
         $args = [];
@@ -143,6 +154,9 @@ class SimplePdo extends SmartPdo
         return '(' . \implode(', ', $args) . ')';
     }
 
+    /**
+     * @param array<int,string> $fields
+     */
     protected function buildSqlSelect(array $fields): string
     {
         if (empty($fields)) {
@@ -155,6 +169,10 @@ class SimplePdo extends SmartPdo
         return \implode(', ', $args);
     }
 
+    /**
+     * @param array<int, mixed> $params
+     * @param array<string, mixed> $fields
+     */
     protected function buildSqlSet(array &$params, array $fields): string
     {
         $args = [];
@@ -178,6 +196,10 @@ class SimplePdo extends SmartPdo
         return in_array($operator, $operators) ? $operator : '';
     }
 
+    /**
+     * @param array<int, mixed> $params
+     * @param array<int|string, mixed> $conditions
+     */
     protected function buildSqlWhere(array &$params, array $conditions): string
     {
         if (empty($conditions)) {
@@ -192,7 +214,13 @@ class SimplePdo extends SmartPdo
             } else {
                 throw new \InvalidArgumentException('Invalid condition format: ' . json_encode($value));
             }
+            if (!is_string($name) || $name === '') {
+                throw new \InvalidArgumentException('Condition field name must be a non-empty string');
+            }
             $name = $this->quoteIdentifier($name);
+            if (!is_string($operator)) {
+                throw new \InvalidArgumentException('Condition operator must be a string');
+            }
             $operator = $this->selectOperator($operator);
             if ($value === null) {
                 $operator = $operator ?: 'IS';

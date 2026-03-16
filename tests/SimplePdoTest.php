@@ -4,18 +4,23 @@ namespace Tqdev\PdoJson\Tests;
 
 class SimplePdoTest extends PdoTestCase
 {
+    /** @var \Tqdev\PdoJson\SimplePdo|null */
     static $pdo;
+    /** @var class-string */
     static $class = '\Tqdev\PdoJson\SimplePdo';
 
     /**
      * @dataProvider selectDataProvider
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('selectDataProvider')]
-    public function testSelect($a, $b, $c, $expected)
+    public function testSelect(string $a, array $b, array $c, string $expected): void
     {
         $this->assertEqualsCanonicalizing(json_decode($expected, true), $this->db->select($a, $b, $c));
     }
 
+    /**
+     * @return array<string, array{0: string, 1: array<int,string>, 2: array<int|string, mixed>, 3: string}>
+     */
     public static function selectDataProvider(): array
     {
         return [
@@ -29,11 +34,14 @@ class SimplePdoTest extends PdoTestCase
      * @dataProvider insertDataProvider
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('insertDataProvider')]
-    public function testInsert($a, $b)
+    public function testInsert(string $a, array $b): void
     {
         $this->assertIsInt($this->db->insert($a, $b));
     }
 
+    /**
+     * @return array<string, array{0: string, 1: array<string, mixed>}>
+     */
     public static function insertDataProvider(): array
     {
         return [
