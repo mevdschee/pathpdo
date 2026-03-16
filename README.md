@@ -155,9 +155,11 @@ modify the pathQuery call):
 ```php
 $results = $db->pathQuery('
     SELECT p.id, c.id, c.content 
-    FROM posts p -- PATH p $
-    LEFT JOIN comments c ON c.post_id = p.id -- PATH c $.comments[]
+    FROM posts p
+    LEFT JOIN comments c ON c.post_id = p.id 
     WHERE p.id = 1
+    -- PATH p $
+    -- PATH c $.comments[]
 ');
 ```
 
