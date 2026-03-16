@@ -8,7 +8,7 @@ class SmartPdo extends LazyPdo
     protected $options;
     protected $commands;
 
-    public function __construct(string $dsn, /*?string*/ $username = null, /*?string*/ $password = null, array $options = array())
+    public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = array())
     {
         $this->driver = strtolower(substr($dsn, 0, strpos($dsn, ':')));
         if (!in_array($this->driver, ['mysql', 'pgsql', 'sqlsrv'])) {

@@ -12,7 +12,7 @@ class LazyPdo extends \PDO
 
     private $pdo = null;
 
-    public function __construct(string $dsn, /*?string*/ $user = null, /*?string*/ $password = null, array $options = array())
+    public function __construct(string $dsn, ?string $user = null, ?string $password = null, array $options = array())
     {
         $this->dsn = $dsn;
         $this->user = $user;
@@ -38,7 +38,7 @@ class LazyPdo extends \PDO
         return $this->pdo;
     }
 
-    public function reconstruct(string $dsn, /*?string*/ $user = null, /*?string*/ $password = null, array $options = array()): bool
+    public function reconstruct(string $dsn, ?string $user = null, ?string $password = null, array $options = array()): bool
     {
         $this->dsn = $dsn;
         $this->user = $user;

@@ -4,7 +4,7 @@ namespace Tqdev\PdoJson;
 
 class SimplePdo extends SmartPdo
 {
-    public function insert($table, $record): int
+    public function insert(string $table, array $record): int
     {
         if (empty($table) || empty($record)) {
             return 0;
@@ -16,7 +16,7 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, false, true);
     }
 
-    public function select($table, $fields = [], $conditions = []): array
+    public function select(string $table, array $fields = [], array $conditions = []): array
     {
         if (empty($table)) {
             return [];
@@ -28,7 +28,7 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, false, false);
     }
 
-    public function update($table, $fields, $conditions): int
+    public function update(string $table, array $fields, array $conditions): int
     {
         if (empty($table) || empty($fields) || empty($conditions)) {
             return 0;
@@ -40,7 +40,7 @@ class SimplePdo extends SmartPdo
         return $this->smartQuery($sql, $params, true, false);
     }
 
-    public function delete($table, $conditions): int
+    public function delete(string $table, array $conditions): int
     {
         if (empty($table) || empty($conditions)) {
             return 0;
