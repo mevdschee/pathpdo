@@ -157,9 +157,9 @@ class PathInference
             $colName = $parts[1];
 
             if (isset($analysis->pathHints[$alias])) {
-                $hintPath = $analysis->pathHints[$alias];
-                // Path hint already specifies the structure, just append column name
-                return rtrim($hintPath, '.') . '.' . $colName;
+                // A provided hint is used verbatim; only the column is appended.
+                // Write [] in the hint when you want an array.
+                return rtrim($analysis->pathHints[$alias], '.') . '.' . $colName;
             }
         } else {
             $colName = $column;
@@ -196,11 +196,10 @@ class PathInference
 
         $rootAlias = $this->findRootAlias($analysis);
 
-        // If this column belongs to the root table, use simplified path
+        // If this column belongs to the root table, use the hint verbatim.
         if ($alias === $rootAlias) {
             if (isset($analysis->pathHints[$rootAlias])) {
-                $rootHint = $analysis->pathHints[$rootAlias];
-                return rtrim($rootHint, '.') . '.' . $colName;
+                return rtrim($analysis->pathHints[$rootAlias], '.') . '.' . $colName;
             }
             if (!empty($cardinality[$alias])) {
                 return '$[].' . $colName;
@@ -208,26 +207,12 @@ class PathInference
             return '$.' . $colName;
         }
 
-        // For non-root columns, build full path
+        // For a non-root column without its own hint, nest under the (verbatim)
+        // root hint. The joined table is inferred as an array when one-to-many.
         if (isset($analysis->pathHints[$rootAlias])) {
-            $rootHint = $analysis->pathHints[$rootAlias];
-            if (!empty($cardinality[$rootAlias])) {
-                if (!empty($cardinality[$alias])) {
-                    if (substr($rootHint, -2) !== '[]') {
-                        return $rootHint . '[].' . $alias . '[].' . $colName;
-                    }
-                    return $rootHint . '.' . $alias . '[].' . $colName;
-                }
-                if (substr($rootHint, -2) !== '[]') {
-                    return $rootHint . '[].' . $alias . '.' . $colName;
-                }
-                return $rootHint . '.' . $alias . '.' . $colName;
-            } else {
-                if (!empty($cardinality[$alias])) {
-                    return $rootHint . '.' . $alias . '[].' . $colName;
-                }
-                return $rootHint . '.' . $alias . '.' . $colName;
-            }
+            $rootHint = rtrim($analysis->pathHints[$rootAlias], '.');
+            $marker = !empty($cardinality[$alias]) ? '[]' : '';
+            return $rootHint . '.' . $alias . $marker . '.' . $colName;
         }
 
         $path = $this->buildPathToTable($alias, $analysis, $cardinality);

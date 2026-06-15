@@ -160,12 +160,13 @@ class PathPdoTest extends PdoTestCase
     public function testPathQueryWithPathsParameterMultipleLevels(): void
     {
         $this->assertNotNull($this->db);
-        // Test deeply nested paths
+        // Hints are used verbatim: $.data is a single object, and the comments
+        // are nested under it as an explicit array.
         $result = $this->db->pathQuery(
-            'SELECT p.id, c.id, c.message 
-             FROM posts p 
-             LEFT JOIN comments c ON c.post_id = p.id 
-             WHERE p.id = :id 
+            'SELECT p.id, c.id, c.message
+             FROM posts p
+             LEFT JOIN comments c ON c.post_id = p.id
+             WHERE p.id = :id
              ORDER BY c.id',
             ['id' => 2],
             [
@@ -177,7 +178,6 @@ class PathPdoTest extends PdoTestCase
         $this->assertArrayHasKey('data', $result);
         $this->assertIsArray($result['data']);
         $this->assertArrayHasKey('id', $result['data']);
-        $this->assertIsArray($result['data']);
         $this->assertEquals(2, $result['data']['id']);
         $this->assertArrayHasKey('comments', $result['data']);
         $this->assertIsArray($result['data']['comments']);
@@ -213,5 +213,39 @@ class PathPdoTest extends PdoTestCase
         );
 
         $this->assertEquals([['id' => 1, 'content' => 'blog started']], $result);
+    }
+
+    public function testPathQueryHintedRootAutoNestsJoinedTable(): void
+    {
+        $this->assertNotNull($this->db);
+        // Only the root is hinted (as an explicit array). The joined comments
+        // have no hint, so they are nested under the root automatically based on
+        // the foreign key, without the hint needing to mention them.
+        $result = $this->db->pathQuery(
+            'SELECT posts.id, comments.id, comments.message
+             FROM posts
+             LEFT JOIN comments ON comments.post_id = posts.id
+             WHERE posts.id <= :id
+             ORDER BY posts.id, comments.id',
+            ['id' => 2],
+            ['posts' => '$.posts[]']
+        );
+
+        $expected = [
+            'posts' => [
+                ['id' => 1, 'comments' => [
+                    ['id' => 1, 'message' => 'great!'],
+                    ['id' => 2, 'message' => 'nice!'],
+                ]],
+                ['id' => 2, 'comments' => [
+                    ['id' => 3, 'message' => 'interesting'],
+                    ['id' => 4, 'message' => 'cool'],
+                    ['id' => 5, 'message' => 'wow'],
+                    ['id' => 6, 'message' => 'amazing'],
+                ]],
+            ],
+        ];
+
+        $this->assertEquals($expected, $result);
     }
 }

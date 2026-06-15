@@ -127,6 +127,51 @@ $results = $db->pathQuery('SELECT * FROM users WHERE id = :id', ['id' => 1]);
 $results = $db->pathQuery('SELECT * FROM users WHERE id = ?', [1]);
 ```
 
+### Automatic Path Inference
+
+When you do not pass any paths, PathPDO infers the structure from the JOINs in
+the query and the foreign keys in the schema. Each table alias becomes a JSON
+key, and the relationship direction decides whether it nests as an array or an
+object:
+
+```php
+// One-to-many: comments has a foreign key to posts, so comments nest as an
+// array under each post. The aliases (p, c) become the JSON keys.
+$db->pathQuery(
+    'SELECT p.id, c.id, c.message
+     FROM posts p
+     LEFT JOIN comments c ON c.post_id = p.id
+     WHERE p.id <= 2 ORDER BY p.id, c.id'
+);
+// [
+//   {"id":1,"c":[{"id":1,"message":"great!"},{"id":2,"message":"nice!"}]},
+//   {"id":2,"c":[{"id":3,"message":"interesting"}, ...]}
+// ]
+
+// Many-to-one: posts has a foreign key to categories, so the category nests as
+// a single object under each post.
+$db->pathQuery(
+    'SELECT p.id, p.content, cat.id, cat.name
+     FROM posts p
+     LEFT JOIN categories cat ON p.category_id = cat.id
+     WHERE p.id = 1'
+);
+// [{"id":1,"content":"blog started","cat":{"id":1,"name":"announcement"}}]
+```
+
+How the cardinality is decided:
+
+- **Foreign keys**: if the joined table has a foreign key to the root table, the
+  join is one-to-many (array). If the root table has a foreign key to the joined
+  table, it is many-to-one (object).
+- **Join type**: without foreign-key information, a `LEFT JOIN` defaults to
+  one-to-many (array).
+- **Root**: a query that returns multiple rows defaults to an array at the root.
+
+Foreign keys are read from the schema (see Metadata Configuration above), so for
+inference to work the relationships must exist in the database or in a metadata
+file.
+
 ### Specifying Paths with Array Parameter
 
 You can specify paths for tables or aliases using the third parameter:
@@ -154,6 +199,13 @@ $results = $db->pathQuery(
 - `$[]` - Array of objects
 - `$.property[]` - Nested array
 - `$.parent.child[]` - Deeply nested array
+
+Hints are used exactly as written: `$.posts` is a single object and `$.posts[]`
+is an array. PathPDO never adds an `[]` to a hint you provide, so include it
+yourself when a table is one-to-many. Tables you do not hint are still nested
+automatically from the foreign keys (see Automatic Path Inference above), so
+hinting only the root is usually enough: `['posts' => '$.posts[]']` nests the
+joined comments under each post without naming them.
 
 ### Examples
 
